@@ -27,29 +27,30 @@ namespace System.Windows.Markup
                 throw new ArgumentNullException(nameof(context));
             }
             
-            var nameResolver = (IXamlNameResolver)context.GetService(typeof(IXamlNameResolver));
+            IXamlNameResolver nameResolver = (IXamlNameResolver)context.GetService(typeof(IXamlNameResolver));
             if (nameResolver == null)
             {
                 throw new InvalidOperationException(SR.Get(SRID.MissingNameResolver));
             }
 
             string name = value as string;
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
                 throw new InvalidOperationException(SR.Get(SRID.MustHaveName));
             }
+
             object obj = nameResolver.Resolve(name);
-            if (obj == null)
+            if (obj != null)
             {
-                string[] names = new string[] { name };
-                obj = nameResolver.GetFixupToken(names, true);
+                return obj;
             }
-            return obj;
+
+            return nameResolver.GetFixupToken(new string[] { name }, true);
         }
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if (context == null || (context.GetService(typeof(IXamlNameProvider)) as  IXamlNameProvider) == null)
+            if (context == null || !(context.GetService(typeof(IXamlNameProvider)) is IXamlNameProvider))
             {
                 return false;
             }
@@ -60,7 +61,6 @@ namespace System.Windows.Markup
             }
 
             return base.CanConvertTo(context, destinationType);
-            
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -70,7 +70,7 @@ namespace System.Windows.Markup
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var nameProvider = (IXamlNameProvider)context.GetService(typeof(IXamlNameProvider));
+            IXamlNameProvider nameProvider = (IXamlNameProvider)context.GetService(typeof(IXamlNameProvider));
             if (nameProvider == null)
             {
                 throw new InvalidOperationException(SR.Get(SRID.MissingNameProvider));

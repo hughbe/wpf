@@ -7,18 +7,18 @@ using System.Diagnostics;
 
 namespace System.Xaml
 {
-    // provides a place to Write a list of Xaml nodes
-    // and Read them back.  W/o exposing the 'XamlNode' type.
-    
-    // Single Writer, multiple reader.
-    // Must complete writing and Close, before reading.
-
+    /// </summary>
+    //// Provides a place to Write a list of Xaml nodes
+    /// and Read them back without exposing the 'XamlNode' type.
+    /// Single Writer, multiple reader.
+    /// Must complete writing and Close, before reading.
+    /// </summary>
     public class XamlNodeList
     {
-        List<XamlNode> _nodeList;
-        bool _readMode = false;
-        XamlWriter _writer;
-        bool _hasLineInfo;
+        private List<XamlNode> _nodeList;
+        private bool _readMode = false;
+        private XamlWriter _writer;
+        private bool _hasLineInfo;
 
         public XamlNodeList(XamlSchemaContext schemaContext)
         {
@@ -26,6 +26,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(schemaContext));
             }
+
             Initialize(schemaContext, 0);
         }
 
@@ -35,6 +36,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(schemaContext));
             }
+
             Initialize(schemaContext, size);
         }
 
@@ -52,10 +54,7 @@ namespace System.Xaml
             _writer = new WriterDelegate(Add, AddLineInfo, schemaContext);
         }
 
-        public XamlWriter Writer
-        {
-            get { return _writer; }
-        }
+        public XamlWriter Writer => _writer;
 
         public XamlReader GetReader()
         {
@@ -67,6 +66,7 @@ namespace System.Xaml
             {
                 throw new XamlException(SR.Get(SRID.SchemaContextNotInitialized));
             }
+
             return new ReaderMultiIndexDelegate(_writer.SchemaContext, Index, _nodeList.Count, _hasLineInfo);
         }
 
@@ -110,6 +110,7 @@ namespace System.Xaml
             {
                 throw new XamlException(SR.Get(SRID.CloseXamlWriterBeforeReading));
             }
+
             return _nodeList[idx];
         }
               
@@ -119,9 +120,6 @@ namespace System.Xaml
             _readMode = false;      // go back to write mode.
         }
 
-        public int Count
-        {
-            get { return _nodeList.Count; }
-        }
+        public int Count => _nodeList.Count;
     }
 }

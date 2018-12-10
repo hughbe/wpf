@@ -8,11 +8,11 @@ namespace System.Xaml
     // This version advances through an externally provided list
     // of nodes with a "Next" delegate.
     // So is suitable for Queues and other simple single reader situations.
-    //
-    class ReaderDelegate : ReaderBaseDelegate
+    /// </summary>
+    internal class ReaderDelegate : ReaderBaseDelegate
     {
         // InfosetNode _currentNode is inherited.
-        XamlNodeNextDelegate _nextDelegate;
+        private XamlNodeNextDelegate _nextDelegate;
 
         public ReaderDelegate(XamlSchemaContext schemaContext, XamlNodeNextDelegate next, bool hasLineInfo)
             : base(schemaContext)
@@ -27,7 +27,7 @@ namespace System.Xaml
         {
             if (IsDisposed)
             {
-                throw new ObjectDisposedException("XamlReader"); // Can't say ReaderDelegate because its internal.
+                throw new ObjectDisposedException(nameof(XamlReader)); // Can't say ReaderDelegate because its internal.
             }
             do
             {
