@@ -86,9 +86,6 @@ namespace System.Xaml
             }
             else
             {
-                if (nameFrags.Length != 2)
-                    throw new InvalidOperationException(SR.Get(SRID.QualifiedNameHasWrongFormat, typeName));
-
                 Assembly a = null;
                 try
                 {
