@@ -78,12 +78,11 @@ namespace System.Xaml
         {
             // ISSUE: we only parse the assembly name and type name
             // all other Type.GetType() type fragments (version, culture info, pub key token etc) are ignored!!!
-            string[] nameFrags = typeName.Split(new Char[] { ',' }, 2);
-            Type type = null;
+            string[] nameFrags = typeName.Split(new char[] { ',' }, 2);
             if (nameFrags.Length == 1)
             {
                 // treat it as an absolute name
-                type = Type.GetType(nameFrags[0]);
+                return Type.GetType(nameFrags[0]);
             }
             else
             {
@@ -95,41 +94,27 @@ namespace System.Xaml
                 {
                     a = LoadAssembly(nameFrags[1].TrimStart(), null);
                 }
-                // ifdef magic to save compiler update.
-                // the fix below is for an FxCop rule about non-CLR exceptions.
-                // however this rule has now been removed.
-                catch (Exception e)   // Load throws generic Exceptions, so this can't be made more specific.
+                catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
                 {
-                    if (CriticalExceptions.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-                    else
-                    {
-                        // If we can't load the assembly, just return null (fall-through).
-                        a = null;
-                    }
                 }
 
                 if (a != null)
                 {
                     try
                     {
-                        type = a.GetType(nameFrags[0]);
                         // If we can't get the type, just return null (fall-through).
+                        return a.GetType(nameFrags[0]);
                     }
                     catch (ArgumentException)
                     {
-                        a = null;
                     }
                     catch (System.Security.SecurityException)
                     {
-                        a = null;
                     }
                 }
-            }
 
-            return type;
+                return null;
+            }
         }
 
         internal static bool IsNullableType(Type type)
@@ -137,6 +122,7 @@ namespace System.Xaml
             return (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Nullable<>)));
         }
 
+#if PBTCOMPILER
         internal static bool IsInternalType(Type type)
         {
             Type origType = type;
@@ -153,6 +139,7 @@ namespace System.Xaml
             // top-level(non nested) type, then it must be top level internal or public type.
             return type.IsNotPublic || (origType != type && type.IsPublic);
         }
+#endif
 
         /// <summary>
         /// Helper for determine if the type is a public class.
@@ -191,11 +178,6 @@ namespace System.Xaml
             }
 #endif
             return type;
-        }
-
-        internal static Type GetMscorlibType(Type type)
-        {
-            return GetFrameworkType(MscorlibReflectionAssemblyName, type);
         }
 
         internal static Type GetSystemType(Type type)
@@ -523,10 +505,12 @@ namespace System.Xaml
             return isFriend;
         }
 
+#if PBTCOMPILER
         internal static bool IsInternalAllowedOnType(Type type)
         {
             return ((LocalAssemblyName == type.Assembly.GetName().Name) || IsFriendAssembly(type.Assembly));
         }
+#endif
 
         // The local assembly that contains the baml.
         internal static string LocalAssemblyName
