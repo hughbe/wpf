@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//  Description: Specifies that the whitespace surrounding an element should be trimmed.
-
 using System;
 using System.Reflection;
 using System.ComponentModel;
@@ -313,10 +311,12 @@ namespace System.Windows.Markup
             {
                 typeConverter = new System.ComponentModel.GuidConverter();
             }
+#if !SYSTEM_XAML
             else if (type == typeof(String))
             {
                 typeConverter = new System.ComponentModel.StringConverter();
             }
+#endif
             else if (type == typeof(CultureInfo))
             {
                 typeConverter = new System.ComponentModel.CultureInfoConverter();
@@ -344,7 +344,7 @@ namespace System.Windows.Markup
             return typeConverter;
         }
 
-        internal static TypeConverter GetCoreConverterFromCustomType(Type type)
+        private static TypeConverter GetCoreConverterFromCustomType(Type type)
         {
             TypeConverter typeConverter = null;
             if (type.IsEnum)
@@ -353,6 +353,7 @@ namespace System.Windows.Markup
                 // takes the underlying type.
                 typeConverter = new System.ComponentModel.EnumConverter(type);
             }
+#if !SYSTEM_XAML
             else if (typeof(Int32).IsAssignableFrom(type))
             {
                 typeConverter = new System.ComponentModel.Int32Converter();
@@ -417,6 +418,7 @@ namespace System.Windows.Markup
             {
                 typeConverter = new System.ComponentModel.StringConverter();
             }
+#endif
             else if (typeof(CultureInfo).IsAssignableFrom(type))
             {
                 typeConverter = new System.ComponentModel.CultureInfoConverter();
@@ -426,16 +428,11 @@ namespace System.Windows.Markup
             {
                 typeConverter = new System.Windows.Markup.TypeTypeConverter();
             }
-#else
-            else if (type == typeof(Type))
-            {
-                typeConverter = new System.Xaml.Replacements.TypeTypeConverter();
-            }
-#endif
             else if (typeof(DateTime).IsAssignableFrom(type))
             {
                 typeConverter = new DateTimeConverter2();
             }
+#endif
             else if (typeof(Uri).IsAssignableFrom(type))
             {
                 typeConverter = new System.Xaml.Replacements.TypeUriConverter();
@@ -455,10 +452,14 @@ namespace System.Windows.Markup
         /// <returns>A TypeConverter for the Type type if found. Null otherwise.</returns>
         internal static TypeConverter GetTypeConverter(Type type)
         {
+#if SYSTEM_XAML
+            Debug.Assert(type != null, "Null passed for type to GetTypeConverter");
+#else
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
+#endif
 
             TypeConverter typeConverter = GetCoreConverterFromCoreType(type);
 
