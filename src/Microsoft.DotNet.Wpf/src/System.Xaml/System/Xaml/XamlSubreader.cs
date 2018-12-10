@@ -6,12 +6,12 @@ namespace System.Xaml
 {
     internal class XamlSubreader : XamlReader, IXamlLineInfo
     {
-        XamlReader _reader;
-        IXamlLineInfo _lineInfoReader;
-        bool _done;
-        bool _firstRead;
-        bool _rootIsStartMember;
-        int _depth;
+        private XamlReader _reader;
+        private IXamlLineInfo _lineInfoReader;
+        private bool _done;
+        private bool _firstRead;
+        private bool _rootIsStartMember;
+        private int _depth;
 
         public XamlSubreader(XamlReader reader)
         {
@@ -27,7 +27,7 @@ namespace System.Xaml
         {
             if (IsDisposed)
             {
-                throw new ObjectDisposedException("XamlReader");  // can't say "XamlSubreader" it's an internal class.
+                throw new ObjectDisposedException(nameof(XamlReader));  // can't say "XamlSubreader" it's an internal class.
             }
             if (!_firstRead)
             {
@@ -37,85 +37,33 @@ namespace System.Xaml
             return true;
         }
 
-        private bool IsEmpty { get { return _done || _firstRead; } }
+        private bool IsEmpty => _done || _firstRead;
 
         public override XamlNodeType NodeType
         {
-            get { return IsEmpty ? XamlNodeType.None : _reader.NodeType; }
+            get => IsEmpty ? XamlNodeType.None : _reader.NodeType;
         }
 
-        public override bool IsEof
-        {
-            get { return IsEmpty ? true : _reader.IsEof; }
-        }
+        public override bool IsEof => IsEmpty || _reader.IsEof;
 
         public override NamespaceDeclaration Namespace
         {
-            get { return IsEmpty ? null : _reader.Namespace; }
+            get => IsEmpty ? null : _reader.Namespace;
         }
 
-        public override XamlType Type
-        {
-            get { return IsEmpty ? null : _reader.Type; }
-        }
+        public override XamlType Type => IsEmpty ? null : _reader.Type;
 
-        public override object Value
-        {
-            get { return IsEmpty ? null : _reader.Value; }
-        }
+        public override object Value => IsEmpty ? null : _reader.Value;
 
-        public override XamlMember Member
-        {
-            get { return IsEmpty ? null : _reader.Member; }
-        }
+        public override XamlMember Member => IsEmpty ? null : _reader.Member;
 
-        public override XamlSchemaContext SchemaContext
-        {
-            get { return _reader.SchemaContext; }
-        }
+        public override XamlSchemaContext SchemaContext => _reader.SchemaContext;
 
-        #region IXamlLineInfo Members
+        public bool HasLineInfo => _lineInfoReader?.HasLineInfo ?? false;
 
-        public bool HasLineInfo
-        {
-            get
-            {
-                if (_lineInfoReader == null)
-                {
-                    return false;
-                }
-                return _lineInfoReader.HasLineInfo;
-            }
+        public int LineNumber => _lineInfoReader?.LineNumber ?? 0;
 
-        }
-
-        public int LineNumber
-        {
-            get
-            {
-                if (_lineInfoReader == null)
-                {
-                    return 0;
-                }
-                return _lineInfoReader.LineNumber;
-            }
-        }
-
-        public int LinePosition
-        {
-            get
-            {
-                if (_lineInfoReader == null)
-                {
-                    return 0;
-                }
-                return _lineInfoReader.LinePosition;
-            }
-        }
-
-        #endregion
-
-        // ----------  Private methods --------------
+        public int LinePosition => _lineInfoReader?.LinePosition ?? 0;
 
         private bool LimitedRead()
         {

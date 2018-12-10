@@ -4,25 +4,20 @@
 
 namespace System.Xaml
 {
-    public interface IXamlIndexingReader
-    {
-        int Count { get; }
-        int CurrentIndex { get; set; }
-    }
-
-    // This is a simple implementation of a Node based XamlReader.
-    // This version maintains its own index into an externally provided list
-    // of nodes And access it with an "Index" delegate.
-    // So is suitable for multiple readers of fixed Lists of Nodes.
-    //
+    /// <summary>
+    /// This is a simple implementation of a Node based XamlReader.
+    /// This version maintains its own index into an externally provided list
+    /// of nodes And access it with an "Index" delegate.
+    /// So is suitable for multiple readers of fixed Lists of Nodes.
+    /// </summary>
     internal class ReaderMultiIndexDelegate : ReaderBaseDelegate, IXamlIndexingReader
     {
-        static XamlNode s_StartOfStream = new XamlNode(XamlNode.InternalNodeType.StartOfStream);
-        static XamlNode s_EndOfStream = new XamlNode(XamlNode.InternalNodeType.EndOfStream);
+        private static XamlNode s_startOfStream = new XamlNode(XamlNode.InternalNodeType.StartOfStream);
+        private static XamlNode s_endOfStream = new XamlNode(XamlNode.InternalNodeType.EndOfStream);
 
-        XamlNodeIndexDelegate _indexDelegate;
-        int _count;
-        int _idx;
+        private XamlNodeIndexDelegate _indexDelegate;
+        private int _count;
+        private int _idx;
 
         public ReaderMultiIndexDelegate(XamlSchemaContext schemaContext, XamlNodeIndexDelegate indexDelegate, int count, bool hasLineInfo)
             : base(schemaContext)
@@ -31,7 +26,7 @@ namespace System.Xaml
             _count = count;
             // Do not set CurrentIndex in the constructor, because it invokes the overridable method Read().
             _idx = -1;
-            _currentNode = s_StartOfStream;
+            _currentNode = s_startOfStream;
             _currentLineInfo = null;
             _hasLineInfo = hasLineInfo;
         }
@@ -40,7 +35,7 @@ namespace System.Xaml
         {
             if (IsDisposed)
             {
-                throw new ObjectDisposedException("XamlReader"); // Can't say ReaderMultiIndexDelegate because its internal.
+                throw new ObjectDisposedException(nameof(XamlReader)); // Can't say ReaderMultiIndexDelegate because its internal.
             }
             do
             {
@@ -64,7 +59,7 @@ namespace System.Xaml
                 else
                 {
                     _idx = _count;
-                    _currentNode = s_EndOfStream;
+                    _currentNode = s_endOfStream;
                     _currentLineInfo = null;
                     break;
                 }
@@ -72,11 +67,11 @@ namespace System.Xaml
             return !IsEof;
         }
 
-        public int Count { get { return _count; } }
+        public int Count => _count;
 
         public int CurrentIndex
         {
-            get { return _idx; }
+            get => _idx;
             set
             {
                 if (value < -1 || value > _count)
@@ -86,7 +81,7 @@ namespace System.Xaml
                 else if (value == -1)
                 {
                     _idx = -1;
-                    _currentNode = s_StartOfStream;
+                    _currentNode = s_startOfStream;
                     _currentLineInfo = null;
                 }
                 else

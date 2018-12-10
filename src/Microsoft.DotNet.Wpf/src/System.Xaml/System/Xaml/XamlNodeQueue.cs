@@ -7,19 +7,20 @@ using System.Diagnostics;
 
 namespace System.Xaml
 {
-    // Provides a FIFO buffer for writing nodes and reading them back.
-    // This is used in XamlReader wrappers.   Nodes are in a Queue and
-    // thus are "consumed" from the queue when read.
-    // If you want a replay-able list see XamlNodeList.
-
+    /// <summary>
+    /// Provides a FIFO buffer for writing nodes and reading them back.
+    /// This is used in XamlReader wrappers. Nodes are in a Queue and
+    /// thus are "consumed" from the queue when read.
+    /// If you want a replay-able list see XamlNodeList.
+    /// </summary>
     public class XamlNodeQueue
     {
-        Queue<XamlNode> _nodeQueue;
-        XamlNode _endOfStreamNode;
+        private Queue<XamlNode> _nodeQueue;
+        private XamlNode _endOfStreamNode;
 
-        ReaderDelegate _reader;
-        XamlWriter _writer;
-        bool _hasLineInfo;
+        private ReaderDelegate _reader;
+        private XamlWriter _writer;
+        private bool _hasLineInfo;
 
         public XamlNodeQueue(XamlSchemaContext schemaContext)
         {
@@ -34,32 +35,14 @@ namespace System.Xaml
         
         public XamlReader Reader
         {
-            get
-            {
-                if (_reader == null)
-                {
-                    _reader = new ReaderDelegate(_writer.SchemaContext, Next, _hasLineInfo);
-                }
-                return _reader;
-            }
+            get => _reader ?? (_reader = new ReaderDelegate(_writer.SchemaContext, Next, _hasLineInfo));
         }
 
-        public XamlWriter Writer
-        {
-            get { return _writer; }
-        }
+        public XamlWriter Writer => _writer; 
 
-        public bool IsEmpty
-        {
-            get { return _nodeQueue.Count == 0; }
-        }
+        public bool IsEmpty => _nodeQueue.Count == 0;
 
-        public int Count
-        {
-            get { return _nodeQueue.Count; }
-        }
-
-        // ======================================
+        public int Count => _nodeQueue.Count;
 
         private void Add(XamlNodeType nodeType, object data)
         {
@@ -69,6 +52,7 @@ namespace System.Xaml
                 _nodeQueue.Enqueue(node);
                 return;
             }
+
             Debug.Assert(XamlNode.IsEof_Helper(nodeType, data));
             _nodeQueue.Enqueue(_endOfStreamNode);
         }

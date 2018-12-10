@@ -4,15 +4,16 @@
 
 namespace System.Xaml
 {
-    // This is the simplest implementation of a Node based XamlWriter.
-    // It turns XamlWriter calls into nodes and passes them up to the
-    // provided _addDelegate.
-    //
-    class WriterDelegate : XamlWriter, IXamlLineInfoConsumer
+    /// <summary>
+    /// This is the simplest implementation of a Node based XamlWriter.
+    /// It turns XamlWriter calls into nodes and passes them up to the
+    /// provided _addDelegate.
+    /// </summary>
+    internal class WriterDelegate : XamlWriter, IXamlLineInfoConsumer
     {
-        XamlNodeAddDelegate _addDelegate;
-        XamlLineInfoAddDelegate _addLineInfoDelegate;
-        XamlSchemaContext _schemaContext;
+        private XamlNodeAddDelegate _addDelegate;
+        private XamlLineInfoAddDelegate _addLineInfoDelegate;
+        private XamlSchemaContext _schemaContext;
         
         public WriterDelegate(XamlNodeAddDelegate add, XamlLineInfoAddDelegate addlineInfoDelegate, XamlSchemaContext xamlSchemaContext)
         {
@@ -20,8 +21,6 @@ namespace System.Xaml
             _addLineInfoDelegate = addlineInfoDelegate;
             _schemaContext = xamlSchemaContext;
         }
-
-        #region XamlWriter Members
 
         public override void WriteGetObject()
         {
@@ -84,13 +83,8 @@ namespace System.Xaml
             }
         }
 
-        public override XamlSchemaContext SchemaContext
-        {
-            get { return _schemaContext; }
-        }
-        #endregion
+        public override XamlSchemaContext SchemaContext => _schemaContext;
 
-        #region IConsumeXamlLineInfo Members
         /// <summary>
         /// </summary>
         /// <param name="lineNumber"></param>
@@ -109,8 +103,6 @@ namespace System.Xaml
                 return _addLineInfoDelegate != null;
             }
         }
-        #endregion
-
 
         private void ThrowBecauseWriterIsClosed(XamlNodeType nodeType, object data)
         {
@@ -126,9 +118,8 @@ namespace System.Xaml
         {
             if (IsDisposed)
             {
-                throw new ObjectDisposedException("XamlWriter"); // Can't say ReaderMultiIndexDelegate because its internal.
+                throw new ObjectDisposedException(nameof(XamlWriter)); // Can't say ReaderMultiIndexDelegate because its internal.
             }
         }
-
     }
 }

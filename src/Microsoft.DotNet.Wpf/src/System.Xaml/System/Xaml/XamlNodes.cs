@@ -6,18 +6,6 @@ using System.Diagnostics;
 
 namespace System.Xaml
 {
-    public enum XamlNodeType:byte
-    {
-        None,       // need something to return when un-inited. (and past Eof)
-        StartObject,
-        GetObject,
-        EndObject,
-        StartMember,
-        EndMember,
-        Value,
-        NamespaceDeclaration,
-    };
-
     internal delegate void XamlNodeAddDelegate(XamlNodeType nodeType, object data);
     internal delegate void XamlLineInfoAddDelegate(int lineNumber, int linePosition);
     internal delegate XamlNode XamlNodeNextDelegate();     
@@ -28,14 +16,11 @@ namespace System.Xaml
     {
         internal enum InternalNodeType:byte { None, StartOfStream, EndOfStream, EndOfAttributes, LineInfo }
 
-        XamlNodeType _nodeType;
-        InternalNodeType _internalNodeType;
+        private XamlNodeType _nodeType;
+        private InternalNodeType _internalNodeType;
         private object _data;
 
-        public XamlNodeType NodeType
-        {
-            get { return _nodeType; } 
-        }
+        public XamlNodeType NodeType => _nodeType;
 
         public XamlNode(XamlNodeType nodeType)
         {
@@ -170,86 +155,37 @@ namespace System.Xaml
 
         public XamlType XamlType
         {
-            get
-            {
-                if (NodeType == XamlNodeType.StartObject)
-                {
-                    return (XamlType)_data;
-                }
-                return null;
-            }
+            get => NodeType == XamlNodeType.StartObject ? (XamlType)_data : null;
         }
 
         public object Value
         {
-            get
-            {
-                if (NodeType == XamlNodeType.Value)
-                {
-                    return _data;
-                }
-                return null;
-            }
+            get => NodeType == XamlNodeType.Value ? _data : null;
         }
 
         public XamlMember Member
         {
-            get
-            {
-                if (NodeType == XamlNodeType.StartMember)
-                {
-                    return (XamlMember)_data;
-                }
-                return null;
-            }
+            get => NodeType == XamlNodeType.StartMember ? (XamlMember)_data : null;
         }
 
         public LineInfo LineInfo
         {
-            get
-            {
-                if (NodeType == XamlNodeType.None)
-                {
-                    return _data as LineInfo;  // might be null for EOF and EOA.
-                }
-                return null;
-            }
+            get => NodeType == XamlNodeType.None ? _data as LineInfo : null;
         }
 
         internal bool IsEof
         {
-            get
-            {
-                if (NodeType == XamlNodeType.None && _internalNodeType == InternalNodeType.EndOfStream)
-                {
-                    return true;
-                }
-                return false;
-            }
+            get => NodeType == XamlNodeType.None && _internalNodeType == InternalNodeType.EndOfStream;
         }
 
         internal bool IsEndOfAttributes
         {
-            get
-            {
-                if (NodeType == XamlNodeType.None && _internalNodeType == InternalNodeType.EndOfAttributes)
-                {
-                    return true;
-                }
-                return false;
-            }
+            get => NodeType == XamlNodeType.None && _internalNodeType == InternalNodeType.EndOfAttributes;
         }
 
         internal bool IsLineInfo
         {
-            get
-            {
-                if (NodeType == XamlNodeType.None && _internalNodeType == InternalNodeType.LineInfo)
-                {
-                    return true;
-                }
-                return false;
-            }
+            get => NodeType == XamlNodeType.None && _internalNodeType == InternalNodeType.LineInfo;
         }
 
         internal static bool IsEof_Helper(XamlNodeType nodeType, object data)
@@ -258,9 +194,8 @@ namespace System.Xaml
             {
                 return false;
             }
-            if (data is InternalNodeType)
+            if (data is InternalNodeType internalNodeType)
             {
-                InternalNodeType internalNodeType = (InternalNodeType)data;
                 if (internalNodeType == InternalNodeType.EndOfStream)
                 {
                     return true;
