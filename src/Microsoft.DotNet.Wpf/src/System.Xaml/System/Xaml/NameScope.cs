@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// Used to store mapping information for names occuring 
-// within the logical tree section.
-
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -17,9 +14,7 @@ namespace System.Xaml
     /// within the logical tree section.
     /// </summary>
     internal class NameScope : INameScopeDictionary
-    {        
-        #region INameScope
-        
+    {
         /// <summary>
         /// Register Name-Object Map 
         /// </summary>
@@ -28,14 +23,17 @@ namespace System.Xaml
         public void RegisterName(string name, object scopedElement)
         {
             if (name == null)
+            {
                 throw new ArgumentNullException(nameof(name));
-
+            }
             if (scopedElement == null)
+            {
                 throw new ArgumentNullException(nameof(scopedElement));
-
+            }
             if (name == string.Empty)
+            {
                 throw new ArgumentException(SR.Get(SRID.NameScopeNameNotEmptyString));
-
+            }
             if (!NameValidationHelper.IsValidIdentifierName(name))
             {
                 throw new ArgumentException(SR.Get(SRID.NameScopeInvalidIdentifierName, name));
@@ -59,14 +57,6 @@ namespace System.Xaml
                     throw new ArgumentException(SR.Get(SRID.NameScopeDuplicateNamesNotAllowed, name));
                 }   
             }
-
-            //if( TraceNameScope.IsEnabled )
-            //{
-            //    TraceNameScope.TraceActivityItem( TraceNameScope.RegisterName,
-            //                                      this, 
-            //                                      name,
-            //                                      scopedElement );
-            //}
         }
 
         /// <summary>
@@ -76,10 +66,13 @@ namespace System.Xaml
         public void UnregisterName(string name)
         {
             if (name == null)
+            {
                 throw new ArgumentNullException(nameof(name));
-
+            }
             if (name == string.Empty)
+            {
                 throw new ArgumentException(SR.Get(SRID.NameScopeNameNotEmptyString));
+            }
 
             if (_nameMap != null && _nameMap[name] != null)
             {
@@ -89,12 +82,6 @@ namespace System.Xaml
             {
                 throw new ArgumentException(SR.Get(SRID.NameScopeNameNotFound, name));
             }
-
-            //if( TraceNameScope.IsEnabled )
-            //{
-            //    TraceNameScope.TraceActivityItem( TraceNameScope.UnregisterName,
-            //                                      this, name );
-            //}
         }
 
         /// <summary>
@@ -105,64 +92,33 @@ namespace System.Xaml
         public object FindName(string name)
         {
             if (_nameMap == null || name == null || name == string.Empty)
+            {
                 return null;
+            }
 
             return _nameMap[name];
         }
 
-        #endregion INameScope
-
-        #region Data
-        
         // This is a HybridDictionary of Name-Object maps
         private HybridDictionary _nameMap;
-
-        #endregion Data
 
         IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
             return new Enumerator(this._nameMap);
         }
 
-        #region IEnumerable methods
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-        #endregion
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        #region IEnumerable<KeyValuePair<string, object> methods
         IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
         {
             return this.GetEnumerator();
         }
-        #endregion
 
-        #region ICollection<KeyValuePair<string, object> methods
-        public int Count
-        {
-            get
-            {
-                if (_nameMap == null)
-                {
-                    return 0;
-                }
-                return _nameMap.Count;
-            }
-        }
+        public int Count => _nameMap != null ? _nameMap.Count : 0;
 
-        public bool IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsReadOnly => false;
 
-        public void Clear()
-        {
-            _nameMap = null;
-        }
+        public void Clear() => _nameMap = null;
 
         public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
         {
@@ -212,11 +168,10 @@ namespace System.Xaml
             {
                 throw new ArgumentException(SR.Get(SRID.ReferenceIsNull, "item.Key"), nameof(item));
             }
+
             return ContainsKey(item.Key);
         }
-        #endregion
 
-        #region IDictionary<string, object> methods
         public object this[string key]
         {
             get
@@ -225,6 +180,7 @@ namespace System.Xaml
                 {
                     throw new ArgumentNullException(nameof(key));
                 }
+    
                 return FindName(key);
             }
             set
@@ -233,7 +189,6 @@ namespace System.Xaml
                 {
                     throw new ArgumentNullException(nameof(key));
                 }
-
                 if (value == null)
                 {
                     throw new ArgumentNullException(nameof(value));
@@ -270,6 +225,7 @@ namespace System.Xaml
             {
                 return false;
             }
+
             UnregisterName(key);
             return true;
         }
@@ -281,6 +237,7 @@ namespace System.Xaml
                 value = null;
                 return false;
             }
+
             value = FindName(key);
             return true;
         }
@@ -320,12 +277,10 @@ namespace System.Xaml
                 return list;
             }
         }
-        #endregion
-
-        #region class Enumerator
-        class Enumerator : IEnumerator<KeyValuePair<string, object>>
+        
+        private class Enumerator : IEnumerator<KeyValuePair<string, object>>
         {
-            IDictionaryEnumerator _enumerator;
+            private IDictionaryEnumerator _enumerator;
             
             public Enumerator(HybridDictionary nameMap)
             {
@@ -337,10 +292,7 @@ namespace System.Xaml
                 }
             }
 
-            public void Dispose()
-            {
-                GC.SuppressFinalize(this);
-            }
+            public void Dispose() => GC.SuppressFinalize(this);
 
             public KeyValuePair<string, object> Current
             {
@@ -356,29 +308,12 @@ namespace System.Xaml
 
             public bool MoveNext()
             {
-                if (_enumerator == null)
-                {
-                    return false;
-                }
-                return _enumerator.MoveNext();
+                return _enumerator != null ? _enumerator.MoveNext() : false;
             }
 
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return this.Current;
-                }
-            }
+            object IEnumerator.Current => this.Current;
 
-            void IEnumerator.Reset()
-            {
-                if (_enumerator != null)
-                {
-                    _enumerator.Reset();
-                }
-            }
+            void IEnumerator.Reset() => _enumerator?.Reset();
         }
-        #endregion
     }
 }

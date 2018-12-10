@@ -2,15 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// Used to store mapping information for names occuring 
-// within the logical tree section.
-
 using System.Globalization;
 
 namespace System.Xaml
 {
     /// <summary>
-    ///     The string used in RuntimeNameProperty is expected to follow certain
+    /// The string used in RuntimeNameProperty is expected to follow certain
     /// rules.  IsValidIdentifierName checks the given string against the rules.
     /// NameValidationCallback extends to all object types and is in the right
     /// format to be used as a DependencyProperty ValidateValueCallback

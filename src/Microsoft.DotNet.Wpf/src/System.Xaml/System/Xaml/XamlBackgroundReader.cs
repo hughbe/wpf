@@ -7,33 +7,34 @@ using System.Threading;
 
 namespace System.Xaml
 {
-    // XamlNode Double Buffering object that multi-threaded access
-    //  ONE reader and ONE writer.
-    // This is the bridge used to Parse on one thread and Build on a second.
-
+    /// <summary>
+    /// XamlNode Double Buffering object that multi-threaded access
+    ///  ONE reader and ONE writer.
+    /// This is the bridge used to Parse on one thread and Build on a second.
+    /// </summary>
     public class XamlBackgroundReader : XamlReader, IXamlLineInfo
     {
-        EventWaitHandle _providerFullEvent;
-        EventWaitHandle _dataReceivedEvent;
+        private EventWaitHandle _providerFullEvent;
+        private EventWaitHandle _dataReceivedEvent;
 
-        XamlNode[] _incoming;
-        int _inIdx;
-        XamlNode[] _outgoing;
-        int _outIdx;
-        int _outValid;
+        private XamlNode[] _incoming;
+        private int _inIdx;
+        private XamlNode[] _outgoing;
+        private int _outIdx;
+        private int _outValid;
 
-        XamlNode _currentNode;
+        private XamlNode _currentNode;
 
-        XamlReader _wrappedReader;
-        XamlReader _internalReader;
-        XamlWriter _writer;
+        private XamlReader _wrappedReader;
+        private XamlReader _internalReader;
+        private XamlWriter _writer;
 
-        bool _wrappedReaderHasLineInfo;
-        int _lineNumber=0;
-        int _linePosition=0;
+        private bool _wrappedReaderHasLineInfo;
+        private int _lineNumber=0;
+        private int _linePosition=0;
         
-        Thread _thread;
-        Exception _caughtException;
+        private Thread _thread;
+        private Exception _caughtException;
 
         public XamlBackgroundReader(XamlReader wrappedReader)
         {
@@ -41,6 +42,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(wrappedReader));
             }
+
             Initialize(wrappedReader, 64);
         }
 
@@ -78,10 +80,7 @@ namespace System.Xaml
             _currentNode = new XamlNode(XamlNode.InternalNodeType.StartOfStream);
         }
 
-        public void StartThread()
-        {
-            StartThread("XAML reader thread");
-        }
+        public void StartThread() => StartThread("XAML reader thread");
 
         public void StartThread(string threadName)
         {
@@ -89,6 +88,7 @@ namespace System.Xaml
             {
                 throw new InvalidOperationException(SR.Get(SRID.ThreadAlreadyStarted));
             }
+
             ParameterizedThreadStart start = new ParameterizedThreadStart(XamlReaderThreadStart);
             _thread = new Thread(start);
             _thread.Name = threadName;
@@ -109,15 +109,9 @@ namespace System.Xaml
             }
         }
 
-        internal bool IncomingFull
-        {
-            get { return _inIdx >= _incoming.Length; }
-        }
+        internal bool IncomingFull => _inIdx >= _incoming.Length;
 
-        internal bool OutgoingEmpty
-        {
-            get { return _outIdx >= _outValid; }
-        }
+        internal bool OutgoingEmpty => _outIdx >= _outValid;
 
         private void SwapBuffers()
         {
@@ -152,6 +146,7 @@ namespace System.Xaml
                 AddToBuffer(new XamlNode(nodeType, data));
                 return;
             }
+
             Debug.Assert(XamlNode.IsEof_Helper(nodeType, data));
             AddToBuffer(new XamlNode(XamlNode.InternalNodeType.EndOfStream));
             _providerFullEvent.Set();
@@ -163,6 +158,7 @@ namespace System.Xaml
             {
                 return;
             }
+
             LineInfo lineInfo = new LineInfo(lineNumber, linePosition);
             XamlNode node = new XamlNode(lineInfo);
             AddToBuffer(node);
@@ -172,8 +168,9 @@ namespace System.Xaml
         {
             if (IsDisposed)
             {
-                throw new ObjectDisposedException("XamlBackgroundReader");
+                throw new ObjectDisposedException(nameof(XamlBackgroundReader));
             }
+
             if (OutgoingEmpty)
             {
                 // This is for users that read PAST the EOF record.
@@ -260,68 +257,27 @@ namespace System.Xaml
             }
         }
 
-        #region XamlReader
+        public override bool Read() => _internalReader.Read();
 
-        public override bool Read()
-        {
-            return _internalReader.Read();
-        }
+        public override XamlNodeType NodeType => _internalReader.NodeType;
 
-        public override XamlNodeType NodeType
-        {
-            get { return _internalReader.NodeType; }
-        }
+        public override bool IsEof => _internalReader.IsEof;
 
-        public override bool IsEof
-        {
-            get { return _internalReader.IsEof; }
-        }
+        public override NamespaceDeclaration Namespace => _internalReader.Namespace;
 
-        public override NamespaceDeclaration Namespace
-        {
-            get { return _internalReader.Namespace; }
-        }
+        public override XamlType Type => _internalReader.Type;
 
-        public override XamlType Type
-        {
-            get { return _internalReader.Type; }
-        }
+        public override object Value => _internalReader.Value;
 
-        public override object Value
-        {
-            get { return _internalReader.Value; }
-        }
+        public override XamlMember Member => _internalReader.Member;
 
-        public override XamlMember Member
-        {
-            get { return _internalReader.Member; }
-        }
+        public override XamlSchemaContext SchemaContext => _internalReader.SchemaContext;
 
-        public override XamlSchemaContext SchemaContext
-        {
-            get { return _internalReader.SchemaContext; }
-        }
+        public bool HasLineInfo => _wrappedReaderHasLineInfo;
 
-        #endregion
+        public int LineNumber => _lineNumber;
 
-        #region IXamlLineInfo Members
-
-        public bool HasLineInfo
-        {
-            get { return _wrappedReaderHasLineInfo; }
-        }
-
-        public int LineNumber
-        {
-            get { return _lineNumber; }
-        }
-
-        public int LinePosition
-        {
-            get { return _linePosition; }
-        }
-
-        #endregion
+        public int LinePosition => _linePosition;
 
         protected override void Dispose(bool disposing)
         {

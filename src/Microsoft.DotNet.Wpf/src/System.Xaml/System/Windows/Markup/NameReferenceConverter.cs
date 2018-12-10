@@ -34,22 +34,24 @@ namespace System.Windows.Markup
             }
 
             string name = value as string;
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
                 throw new InvalidOperationException(SR.Get(SRID.MustHaveName));
             }
+
             object obj = nameResolver.Resolve(name);
-            if (obj == null)
+            if (obj != null)
             {
-                string[] names = new string[] { name };
-                obj = nameResolver.GetFixupToken(names, true);
+                return obj;
             }
-            return obj;
+
+            string[] names = new string[] { name };
+            return nameResolver.GetFixupToken(names, true);
         }
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if (context == null || (context.GetService(typeof(IXamlNameProvider)) as  IXamlNameProvider) == null)
+            if (context == null || !(context.GetService(typeof(IXamlNameProvider)) is IXamlNameProvider))
             {
                 return false;
             }

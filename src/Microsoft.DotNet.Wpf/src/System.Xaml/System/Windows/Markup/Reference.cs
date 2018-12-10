@@ -25,24 +25,27 @@ namespace System.Windows.Markup
         {
             if (serviceProvider == null)
             {
-                throw new ArgumentNullException("serviceProvider");
+                throw new ArgumentNullException(nameof(serviceProvider));
             }
+
             IXamlNameResolver nameResolver = serviceProvider.GetService(typeof(IXamlNameResolver)) as IXamlNameResolver;
             if (nameResolver == null)
             {
                 throw new InvalidOperationException(SR.Get(SRID.MissingNameResolver));
             }
-            if (String.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(Name))
             {
                 throw new InvalidOperationException(SR.Get(SRID.MustHaveName));
             }
+
             object obj = nameResolver.Resolve(Name);
-            if (obj == null)
+            if (obj != null)
             {
-                string[] names = new string[] { Name };
-                obj = nameResolver.GetFixupToken(names, true);
+                return obj;
             }
-            return obj;
+
+            string[] names = new string[] { Name };
+            return nameResolver.GetFixupToken(names, true);
         }
     }
 }
