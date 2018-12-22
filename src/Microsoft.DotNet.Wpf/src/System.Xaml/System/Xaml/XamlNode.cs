@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Xaml
 {
@@ -24,19 +25,10 @@ namespace System.Xaml
 
         public XamlNode(XamlNodeType nodeType)
         {
-#if DEBUG
-            switch (nodeType)
-            {
-            case XamlNodeType.EndObject:
-            case XamlNodeType.EndMember:
-            case XamlNodeType.GetObject:
-                break;
+            Debug.Assert(nodeType == XamlNodeType.EndObject ||
+                            nodeType == XamlNodeType.EndMember ||
+                            nodeType == XamlNodeType.GetObject, "XamlNode ctor: Illegal node type");
 
-            default:
-                Debug.Assert(false, "XamlNode Ctor missing data argument");
-                break;
-            }
-#endif
             _nodeType = nodeType;
             _internalNodeType = InternalNodeType.None;
             _data = null;
@@ -44,36 +36,6 @@ namespace System.Xaml
 
         public XamlNode(XamlNodeType nodeType, object data)
         {
-#if DEBUG
-            switch(nodeType)
-            {
-            case XamlNodeType.StartObject:
-                Debug.Assert(data is XamlType, "XamlNode ctor, StartObject data is not a XamlType");
-                break;
-
-            case XamlNodeType.StartMember:
-                Debug.Assert(data is XamlMember, "XamlNode ctor, StartMember data is not a XamlMember");
-                break;
-
-            case XamlNodeType.NamespaceDeclaration:
-                Debug.Assert(data is NamespaceDeclaration, "XamlNode ctor, NamespaceDeclaration data is not a NamespaceDeclaration");
-                break;
-
-            case XamlNodeType.Value:
-                // can be anything;
-                break;
-
-            case XamlNodeType.EndObject:
-            case XamlNodeType.EndMember:
-            case XamlNodeType.GetObject:
-                Debug.Assert(data == null, "XamlNode ctor, Internal XamlNode data must be null for this Node type");
-                break;
-
-            default:
-                Debug.Assert(false, "XamlNode ctor, incorrect ctor called.");
-                break;
-            }
-#endif
             _nodeType = nodeType;
             _internalNodeType = InternalNodeType.None;
             _data = data;
@@ -96,6 +58,7 @@ namespace System.Xaml
             _data = lineInfo;
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             string str = String.Format(TypeConverterHelper.InvariantEnglishUS, "{0}: ", this.NodeType);
@@ -188,6 +151,7 @@ namespace System.Xaml
             get => NodeType == XamlNodeType.None && _internalNodeType == InternalNodeType.LineInfo;
         }
 
+        [ExcludeFromCodeCoverage]
         internal static bool IsEof_Helper(XamlNodeType nodeType, object data)
         {
             if (nodeType != XamlNodeType.None)
