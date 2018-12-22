@@ -447,7 +447,6 @@ namespace System.Xaml.Schema
             out ICollection<EventInfo> newEvents, out List<XamlMember> knownMembers)
         {
             Debug.Assert(UnderlyingType != null, "Caller should check for UnderlyingType == null");
-            Debug.Assert(_nonAttachableMemberCache != null, "Members property should have been invoked before this");
 
             PropertyInfo[] propList = UnderlyingType.GetProperties(AllProperties_BF);
             EventInfo[] eventList = UnderlyingType.GetEvents(AllProperties_BF);
@@ -708,20 +707,12 @@ namespace System.Xaml.Schema
         private void LookupAllStaticAccessors(out Dictionary<string, List<MethodInfo>> getters, 
             out Dictionary<string, List<MethodInfo>> setters, out Dictionary<string, List<MethodInfo>> adders)
         {
-            getters = new Dictionary<string,List<MethodInfo>>();
-            setters = new Dictionary<string,List<MethodInfo>>();
-            adders = new Dictionary<string,List<MethodInfo>>();
+            getters = new Dictionary<string, List<MethodInfo>>();
+            setters = new Dictionary<string, List<MethodInfo>>();
+            adders = new Dictionary<string, List<MethodInfo>>();
 
             MethodInfo[] allMethods = UnderlyingType.GetMethods(AttachableProperties_BF);
-
-            if (UnderlyingType.IsVisible)
-            {
-                LookupAllStaticAccessorsHelper(allMethods, getters, setters, adders, true);
-            }
-            else
-            {
-                LookupAllStaticAccessorsHelper(allMethods, getters, setters, adders, false);
-            }
+            LookupAllStaticAccessorsHelper(allMethods, getters, setters, adders, UnderlyingType.IsVisible);
         }
 
         private void LookupAllStaticAccessorsHelper(MethodInfo[] allMethods, Dictionary<string,List<MethodInfo>> getters,
@@ -947,7 +938,6 @@ namespace System.Xaml.Schema
         internal IList<XamlMember> LookupAllAttachableMembers(XamlSchemaContext schemaContext)
         {
             Debug.Assert(UnderlyingType != null, "Caller should check for UnderlyingType == null");
-            Debug.Assert(_attachableMemberCache != null, "AttachableMembers property should have been invoked before this");
 
             List<XamlMember> result = new List<XamlMember>();
 
@@ -978,11 +968,7 @@ namespace System.Xaml.Schema
                     MethodInfo getter, setter;
                     PickAttachablePropertyAccessors(getterList, nameAndSetterList.Value, out getter, out setter);
                     member = schemaContext.GetAttachableProperty(name, getter, setter);
-                    // Filter out read-only properties except for dictionaries and collections
-                    if (member.IsReadOnly && !member.Type.IsUsableAsReadOnly)
-                    {
-                        member = null;
-                    }
+                    Debug.Assert(!member.IsReadOnly);
                 }
                 if (member != null)
                 {
@@ -1038,10 +1024,7 @@ namespace System.Xaml.Schema
         #endregion
 
         // Used by Reflector for attribute lookups
-        protected override MemberInfo Member
-        {
-            get { return UnderlyingType; }
-        }
+        protected override MemberInfo Member => UnderlyingType;
 
         private static object GetCustomAttribute(Type attrType, Type reflectedType)
         {
@@ -1052,9 +1035,7 @@ namespace System.Xaml.Schema
             }
             if (objs.Length > 1)
             {
-                string message = SR.Get(SRID.TooManyAttributesOnType,
-                                                    reflectedType.Name, attrType.Name);
-                throw new XamlSchemaException(message);
+                throw new XamlSchemaException(SR.Get(SRID.TooManyAttributesOnType, reflectedType.Name, attrType.Name));
             }
             return objs[0];
         }
@@ -1089,7 +1070,7 @@ namespace System.Xaml.Schema
 
         internal class ThreadSafeDictionary<K,V> : Dictionary<K, V> where V : class
         {
-            bool _isComplete;
+            private bool _isComplete;
 
             internal ThreadSafeDictionary()
             {
@@ -1097,7 +1078,7 @@ namespace System.Xaml.Schema
 
             public bool IsComplete
             {
-                get { return _isComplete; }
+                get => _isComplete;
                 set
                 {
                     Debug.Assert(value);

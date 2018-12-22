@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security;
 using System.Xaml.MS.Impl;
@@ -16,8 +15,8 @@ namespace System.Xaml.Schema
     /// </SecurityNote>
     public class XamlMemberInvoker
     {
-        private static XamlMemberInvoker s_Directive;
-        private static XamlMemberInvoker s_Unknown;
+        private static XamlMemberInvoker s_directive;
+        private static XamlMemberInvoker s_unknown;
         private static object[] s_emptyObjectArray = new object[0];
 
         private XamlMember _member;
@@ -29,34 +28,17 @@ namespace System.Xaml.Schema
 
         public XamlMemberInvoker(XamlMember member)
         {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-            _member = member;
+            _member = member ?? throw new ArgumentNullException(nameof(member));
         }
 
         public static XamlMemberInvoker UnknownInvoker
         {
-            get
-            {
-                if (s_Unknown == null)
-                {
-                    s_Unknown = new XamlMemberInvoker();
-                }
-                return s_Unknown;
-            }
+            get => s_unknown ?? (s_unknown =new XamlMemberInvoker());
         }
 
-        public MethodInfo UnderlyingGetter
-        {
-            get { return IsUnknown ? null : _member.Getter; }
-        }
+        public MethodInfo UnderlyingGetter => IsUnknown ? null : _member.Getter;
 
-        public MethodInfo UnderlyingSetter
-        {
-            get { return IsUnknown ? null : _member.Setter; }
-        }
+        public MethodInfo UnderlyingSetter => IsUnknown ? null : _member.Setter;
 
         public virtual object GetValue(object instance)
         {
@@ -64,6 +46,7 @@ namespace System.Xaml.Schema
             {
                 throw new ArgumentNullException(nameof(instance));
             }
+
             ThrowIfUnknown();
             if (UnderlyingGetter == null)
             {
@@ -95,6 +78,7 @@ namespace System.Xaml.Schema
             {
                 throw new ArgumentNullException(nameof(instance));
             }
+
             ThrowIfUnknown();
             if (UnderlyingSetter == null)
             {
@@ -122,14 +106,7 @@ namespace System.Xaml.Schema
 
         internal static XamlMemberInvoker DirectiveInvoker
         {
-            get
-            {
-                if (s_Directive == null)
-                {
-                    s_Directive = new DirectiveMemberInvoker();
-                }
-                return s_Directive;
-            }
+            get => s_directive?? (s_directive = new DirectiveMemberInvoker());
         }
 
         // Returns true/false if ShouldSerialize method was invoked, null if no method was found
@@ -178,33 +155,7 @@ namespace System.Xaml.Schema
             return ShouldSerializeResult.Default;
         }
 
-        // vvvvv---- Unused members.  Servicing policy is to retain these anyway.  -----vvvvv
-        /// <SecurityNote>
-        /// Critical: Sets critical fields _getterIsSystemXamlNonPublic and _setterIsSystemXamlNonPublic
-        /// Safe: Gets the result from SafeCritical method SafeReflectionInvoker.IsSystemXamlNonPublic.
-        ///       The MethodInfo we're checking is exactly the one we're invoking, so even if the
-        ///       MethodInfo lies about its visibility, there is no harm.
-        /// Note: The [SecurityCritical] attribute isn't functionally necessary but flags the
-        ///       method as security critical and changes should be reviewed.
-        /// </SecurityNote>
-        [SecuritySafeCritical]
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Retained per servicing policy.")]
-        private static bool IsSystemXamlNonPublic(
-            ref ThreeValuedBool methodIsSystemXamlNonPublic, MethodInfo method)
-        {
-            if (methodIsSystemXamlNonPublic == ThreeValuedBool.NotSet)
-            {
-                bool result = SafeReflectionInvoker.IsSystemXamlNonPublic(method);
-                methodIsSystemXamlNonPublic = result ? ThreeValuedBool.True : ThreeValuedBool.False;
-            }
-            return methodIsSystemXamlNonPublic == ThreeValuedBool.True;
-        }
-        // ^^^^^----- End of unused members.  -----^^^^^
-
-        private bool IsUnknown
-        {
-            get { return _member == null || _member.UnderlyingMember == null; }
-        }
+        private bool IsUnknown => _member == null || _member.UnderlyingMember == null;
 
         private void ThrowIfUnknown()
         {

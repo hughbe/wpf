@@ -28,6 +28,7 @@ namespace System.Xaml.Permissions
             {
                 throw new ArgumentNullException(nameof(allowedAccess));
             }
+
             Init(false, new XamlAccessLevel[] { allowedAccess });
         }
 
@@ -37,20 +38,21 @@ namespace System.Xaml.Permissions
             {
                 throw new ArgumentNullException(nameof(allowedAccess));
             }
+
             List<XamlAccessLevel> accessList = new List<XamlAccessLevel>(allowedAccess);
             foreach (XamlAccessLevel accessLevel in allowedAccess)
             {
                 if (accessLevel == null)
                 {
-                    throw new ArgumentException(SR.Get(SRID.CollectionCannotContainNulls, "allowedAccess"));
+                    throw new ArgumentException(SR.Get(SRID.CollectionCannotContainNulls, nameof(allowedAccess)), nameof(allowedAccess));
                 }
+
                 accessList.Add(accessLevel);
             }
             Init(false, accessList);
         }
 
 #if NETCOREAPP3_0
-
         [ComVisible(false)]
         public override bool Equals(object obj)
         {
@@ -175,6 +177,7 @@ namespace System.Xaml.Permissions
             {
                 throw new ArgumentNullException(nameof(requestedAccess));
             }
+
             if (_isUnrestricted)
             {
                 return true;
@@ -195,10 +198,11 @@ namespace System.Xaml.Permissions
             {
                 return null;
             }
-            XamlLoadPermission other = CastPermission(target, "target");
+
+            XamlLoadPermission other = CastPermission(target, nameof(target));
             if (other.IsUnrestricted())
             {
-                return this.Copy();
+                return Copy();
             }
             if (this.IsUnrestricted())
             {
@@ -235,7 +239,8 @@ namespace System.Xaml.Permissions
                 bool isEmpty = !IsUnrestricted() && AllowedAccess.Count == 0;
                 return isEmpty;
             }
-            XamlLoadPermission other = CastPermission(target, "target");
+
+            XamlLoadPermission other = CastPermission(target, nameof(target));
             if (other.IsUnrestricted())
             {
                 return true;
@@ -282,7 +287,8 @@ namespace System.Xaml.Permissions
             {
                 return this.Copy();
             }
-            XamlLoadPermission xamlOther = CastPermission(other, "other");
+
+            XamlLoadPermission xamlOther = CastPermission(other, nameof(other));
             if (IsUnrestricted() || xamlOther.IsUnrestricted())
             {
                 return new XamlLoadPermission(PermissionState.Unrestricted);
@@ -312,10 +318,7 @@ namespace System.Xaml.Permissions
             return new XamlLoadPermission(mergedAccess);
         }
         
-        public bool IsUnrestricted()
-        {
-            return _isUnrestricted;
-        }
+        public bool IsUnrestricted() => _isUnrestricted;
 
         private static XamlLoadPermission CastPermission(IPermission other, string argName)
         {

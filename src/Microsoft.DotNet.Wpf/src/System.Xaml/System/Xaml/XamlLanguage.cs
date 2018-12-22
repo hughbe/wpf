@@ -3,13 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Windows.Markup;
 using System.Xaml.MS.Impl;
 using System.Xaml.Schema;
 using System.Xml.Serialization;
+using System.Windows.Markup;
 
 namespace System.Xaml
 {
@@ -182,68 +182,68 @@ namespace System.Xaml
         private static Lazy<ReadOnlyCollection<XamlDirective>> s_allDirectives =
             new Lazy<ReadOnlyCollection<XamlDirective>>(GetAllDirectives);
 
-        public static IList<string> XamlNamespaces { get { return s_xamlNamespaces; } }
-        public static IList<string> XmlNamespaces { get { return s_xmlNamespaces; } }
+        public static IList<string> XamlNamespaces => s_xamlNamespaces;
+        public static IList<string> XmlNamespaces => s_xmlNamespaces;
 
-        public static XamlType Array { get { return s_array.Value; } }
-        public static XamlType Member { get { return s_member.Value; } }
-        public static XamlType Null { get { return s_null.Value; } }
-        public static XamlType Property { get { return s_property.Value; } }
-        public static XamlType Reference { get { return s_reference.Value; } }
-        public static XamlType Static { get { return s_static.Value; } }
-        public static XamlType Type { get { return s_type.Value; } }
-        public static XamlType String { get { return s_string.Value; } }
-        public static XamlType Double { get { return s_double.Value; } }
-        public static XamlType Int32 { get { return s_int32.Value; } }
-        public static XamlType Boolean { get { return s_boolean.Value; } }
-        public static XamlType XData { get { return s_xDataHolder.Value; } }
+        public static XamlType Array => s_array.Value;
+        public static XamlType Member => s_member.Value;
+        public static XamlType Null => s_null.Value;
+        public static XamlType Property => s_property.Value;
+        public static XamlType Reference => s_reference.Value;
+        public static XamlType Static => s_static.Value;
+        public static XamlType Type => s_type.Value;
+        public static XamlType String => s_string.Value;
+        public static XamlType Double => s_double.Value;
+        public static XamlType Int32 => s_int32.Value;
+        public static XamlType Boolean => s_boolean.Value;
+        public static XamlType XData => s_xDataHolder.Value;
         
-        public static XamlType Object { get { return s_object.Value; } }
-        public static XamlType Char { get { return s_char.Value; } }
-        public static XamlType Single { get { return s_single.Value; } }
-        public static XamlType Byte { get { return s_byte.Value; } }
-        public static XamlType Int16 { get { return s_int16.Value; } }
-        public static XamlType Int64 { get { return s_int64.Value; } }
-        public static XamlType Decimal { get { return s_decimal.Value; } }
-        public static XamlType Uri { get { return s_uri.Value; } }
-        public static XamlType TimeSpan { get { return s_timespan.Value; } }
+        public static XamlType Object => s_object.Value;
+        public static XamlType Char => s_char.Value;
+        public static XamlType Single => s_single.Value;
+        public static XamlType Byte => s_byte.Value;
+        public static XamlType Int16 => s_int16.Value;
+        public static XamlType Int64 => s_int64.Value;
+        public static XamlType Decimal => s_decimal.Value;
+        public static XamlType Uri => s_uri.Value;
+        public static XamlType TimeSpan => s_timespan.Value;
 
-        public static ReadOnlyCollection<XamlType> AllTypes { get { return s_allTypes.Value; } }
+        public static ReadOnlyCollection<XamlType> AllTypes => s_allTypes.Value;
 
-        public static XamlDirective Arguments { get { return s_arguments.Value; } }
-        public static XamlDirective AsyncRecords { get { return s_asyncRecords.Value; } }
-        public static XamlDirective Class { get { return s_class.Value; } }
-        public static XamlDirective ClassModifier { get { return s_classModifier.Value; } }
-        public static XamlDirective Code { get { return s_code.Value; } }
-        public static XamlDirective ConnectionId { get { return s_connectionId.Value; } }
-        public static XamlDirective FactoryMethod { get { return s_factoryMethod.Value; } }
-        public static XamlDirective FieldModifier { get { return s_fieldModifier.Value; } }
-        public static XamlDirective Items { get { return s_items.Value; } }
-        public static XamlDirective Initialization { get { return s_initialization.Value; } }
-        public static XamlDirective Key { get { return s_key.Value; } }
-        public static XamlDirective Members { get { return s_members.Value; } }
-        public static XamlDirective ClassAttributes { get { return s_classAttributes.Value; } }
-        public static XamlDirective Name { get { return s_name.Value; } }
-        public static XamlDirective PositionalParameters { get { return s_positionalParameters.Value; } }
-        public static XamlDirective Shared { get { return s_shared.Value; } }
-        public static XamlDirective Subclass { get { return s_subclass.Value; } }
-        public static XamlDirective SynchronousMode { get { return s_synchronousMode.Value; } }
-        public static XamlDirective TypeArguments { get { return s_typeArguments.Value; } }
-        public static XamlDirective Uid { get { return s_uid.Value; } }
-        public static XamlDirective UnknownContent { get { return s_unknownContent.Value; } }
+        public static XamlDirective Arguments => s_arguments.Value;
+        public static XamlDirective AsyncRecords => s_asyncRecords.Value;
+        public static XamlDirective Class => s_class.Value;
+        public static XamlDirective ClassModifier => s_classModifier.Value;
+        public static XamlDirective Code => s_code.Value;
+        public static XamlDirective ConnectionId => s_connectionId.Value;
+        public static XamlDirective FactoryMethod => s_factoryMethod.Value;
+        public static XamlDirective FieldModifier => s_fieldModifier.Value;
+        public static XamlDirective Items => s_items.Value;
+        public static XamlDirective Initialization => s_initialization.Value;
+        public static XamlDirective Key => s_key.Value;
+        public static XamlDirective Members => s_members.Value;
+        public static XamlDirective ClassAttributes => s_classAttributes.Value;
+        public static XamlDirective Name => s_name.Value;
+        public static XamlDirective PositionalParameters => s_positionalParameters.Value;
+        public static XamlDirective Shared => s_shared.Value;
+        public static XamlDirective Subclass => s_subclass.Value;
+        public static XamlDirective SynchronousMode => s_synchronousMode.Value;
+        public static XamlDirective TypeArguments => s_typeArguments.Value;
+        public static XamlDirective Uid => s_uid.Value;
+        public static XamlDirective UnknownContent => s_unknownContent.Value;
 
-        public static XamlDirective Base { get { return s_base.Value; } }
-        public static XamlDirective Lang { get { return s_lang.Value; } }
-        // This isn't a node stream directive, we should get rid of it
-        public static XamlDirective Space { get { return s_space.Value; } }
+        public static XamlDirective Base => s_base.Value;
+        public static XamlDirective Lang => s_lang.Value;
 
-        public static ReadOnlyCollection<XamlDirective> AllDirectives { get { return s_allDirectives.Value; } }
+        public static XamlDirective Space => s_space.Value;
 
-        internal static XamlType MarkupExtension { get { return s_markupExtension.Value; } }
-        internal static XamlType INameScope { get { return s_iNameScope.Value; } }
-        internal static XamlType PositionalParameterDescriptor { get { return s_positionalParameterDescriptor.Value; } }
+        public static ReadOnlyCollection<XamlDirective> AllDirectives => s_allDirectives.Value;
+
+        internal static XamlType MarkupExtension => s_markupExtension.Value;
+        internal static XamlType INameScope => s_iNameScope.Value;
+        internal static XamlType PositionalParameterDescriptor => s_positionalParameterDescriptor.Value;
         // Careful: accessing this faults in System.Xml
-        internal static XamlType IXmlSerializable { get { return s_iXmlSerializable.Value; } }
+        internal static XamlType IXmlSerializable => s_iXmlSerializable.Value;
 
         internal static string TypeAlias(Type type)
         {
@@ -499,5 +499,4 @@ namespace System.Xaml
         }
     }
 #endif
-
 }

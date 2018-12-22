@@ -64,11 +64,11 @@ namespace System.Xaml.Schema
             }
 
             // If the type doesn't match any of the interfaces, check for Add methods
-            if (TryGetDictionaryAdder(type, false /*mayBeIDictionary*/, out addMethod))
+            if (TryGetDictionaryAdder(type, mayBeIDictionary: false, addMethod: out addMethod))
             {
                 return XamlCollectionKind.Dictionary;
             }
-            if (TryGetCollectionAdder(type, false /*mayBeICollection*/, out addMethod))
+            if (TryGetCollectionAdder(type, mayBeICollection: false, addMethod: out addMethod))
             {
                 return XamlCollectionKind.Collection;
             }
@@ -82,17 +82,21 @@ namespace System.Xaml.Schema
             switch (collectionKind)
             {
                 case XamlCollectionKind.Collection:
-                    bool isCollection = TryGetCollectionAdder(type, true /*mayBeICollection*/, out result);
-                    if (isCollection && result == null)
+                    if (TryGetCollectionAdder(type, mayBeICollection: true, addMethod: out result))
                     {
-                        throw new XamlSchemaException(SR.Get(SRID.AmbiguousCollectionItemType, type));
+                        if (result == null)
+                        {
+                            throw new XamlSchemaException(SR.Get(SRID.AmbiguousCollectionItemType, type));
+                        }
                     }
                     break;
                 case XamlCollectionKind.Dictionary:
-                    bool isDictionary = TryGetDictionaryAdder(type, true /*mayBeIDictionary*/, out result);
-                    if (isDictionary && result == null)
+                    if (TryGetDictionaryAdder(type, mayBeIDictionary: true, addMethod: out result))
                     {
-                        throw new XamlSchemaException(SR.Get(SRID.AmbiguousDictionaryItemType, type));
+                        if (result == null)
+                        {
+                            throw new XamlSchemaException(SR.Get(SRID.AmbiguousDictionaryItemType, type));
+                        }
                     }
                     break;
             }

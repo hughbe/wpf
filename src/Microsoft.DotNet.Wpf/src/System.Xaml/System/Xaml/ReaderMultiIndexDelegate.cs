@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Xaml
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace System.Xaml
     /// of nodes And access it with an "Index" delegate.
     /// So is suitable for multiple readers of fixed Lists of Nodes.
     /// </summary>
-    internal class ReaderMultiIndexDelegate : ReaderBaseDelegate, IXamlIndexingReader
+    internal sealed class ReaderMultiIndexDelegate : ReaderBaseDelegate, IXamlIndexingReader
     {
         private static XamlNode s_startOfStream = new XamlNode(XamlNode.InternalNodeType.StartOfStream);
         private static XamlNode s_endOfStream = new XamlNode(XamlNode.InternalNodeType.EndOfStream);
@@ -35,7 +37,7 @@ namespace System.Xaml
         {
             if (IsDisposed)
             {
-                throw new ObjectDisposedException(nameof(XamlReader)); // Can't say ReaderMultiIndexDelegate because its internal.
+                throw new ObjectDisposedException(nameof(XamlReader)); // Can't say ReaderMultiIndexDelegate because it is internal.
             }
             do
             {
@@ -46,15 +48,10 @@ namespace System.Xaml
                     {
                         return true;   // This is the common/fast path
                     }
-                    // else do the NONE node stuff.
-                    if (_currentNode.LineInfo != null)
-                    {
-                        _currentLineInfo = _currentNode.LineInfo;
-                    }
-                    else if (_currentNode.IsEof)
-                    {
-                        break;
-                    }
+
+                    Debug.Assert(!_currentNode.IsEof, "EOF nodes are not added to the node list in the index delegate.");
+                    Debug.Assert(_currentNode.LineInfo != null, "Line nodes are always initialized.");
+                    _currentLineInfo = _currentNode.LineInfo;
                 }
                 else
                 {

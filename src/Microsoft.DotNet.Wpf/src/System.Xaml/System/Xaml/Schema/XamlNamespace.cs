@@ -11,7 +11,7 @@ using MS.Internal.Xaml.Parser;
 
 namespace System.Xaml.Schema
 {
-    class XamlNamespace
+    internal class XamlNamespace
     {
         public readonly XamlSchemaContext SchemaContext;
 
@@ -46,21 +46,12 @@ namespace System.Xaml.Schema
             _typeCache = XamlSchemaContext.CreateDictionary<string, XamlType>();
         }
 
-        public bool IsResolved
-        {
-            get { return (null != _assemblyNamespaces); }
-        }
+        public bool IsResolved => _assemblyNamespaces != null;
 
         public ICollection<XamlType> GetAllXamlTypes()
         {
-            if (_allPublicTypes == null)
-            {
-                _allPublicTypes = LookupAllTypes();
-            }
-            return _allPublicTypes;
+            return _allPublicTypes ?? (_allPublicTypes = LookupAllTypes());
         }
-
-        #region GetXamlType
 
         public XamlType GetXamlType(string typeName, params XamlType[] typeArgs)
         {
@@ -68,6 +59,7 @@ namespace System.Xaml.Schema
             {
                 return null;
             }
+
             string fallbackName = GetTypeExtensionName(typeName);
             if (typeArgs == null || typeArgs.Length == 0)
             {
@@ -98,10 +90,12 @@ namespace System.Xaml.Schema
 
             // And save it in our cache
             xamlType = SchemaContext.GetXamlType(type);
-            if (xamlType != null)
+            if (xamlType == null)
             {
-                xamlType = XamlSchemaContext.TryAdd(_typeCache, typeName, xamlType);
+                return null;
             }
+
+            xamlType = XamlSchemaContext.TryAdd(_typeCache, typeName, xamlType);
             return xamlType;
         }
 
@@ -149,6 +143,7 @@ namespace System.Xaml.Schema
                 {
                     return null; // subscript parse error
                 }
+
                 type = (rank == 1) ? type.MakeArrayType() : type.MakeArrayType(rank);
             }
             while (pos < subscript.Length);
@@ -174,23 +169,12 @@ namespace System.Xaml.Schema
             return clrTypeArgs;
         }
 
-        #endregion
-
         internal int RevisionNumber
         {
             // The only external mutation we allow is adding new namespaces. So the count of
             // namespaces also serves as a revision number.
-            get { return (_assemblyNamespaces != null) ? _assemblyNamespaces.Count : 0; }
+            get => (_assemblyNamespaces != null) ? _assemblyNamespaces.Count : 0;
         }
-
-        // ================ Internal Static functions ======================================
-
-        internal static Type GetTypeFromFullTypeName(string fullName)
-        {
-            return Type.GetType(fullName);
-        }
-
-        // ======================================================
 
         private Type TryGetType(string typeName)
         {
@@ -275,7 +259,9 @@ namespace System.Xaml.Schema
 
                 Type type = asm.GetType(longName);
                 if (type != null)
+                {
                     return type;
+                }
             }
             return null;
         }

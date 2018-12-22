@@ -27,6 +27,7 @@ namespace System.Xaml.Permissions
             {
                 throw new ArgumentNullException(nameof(assembly));
             }
+
             return new XamlAccessLevel(assembly.FullName, null);
         }
 
@@ -36,7 +37,8 @@ namespace System.Xaml.Permissions
             {
                 throw new ArgumentNullException(nameof(assemblyName));
             }
-            ValidateAssemblyName(assemblyName, "assemblyName");
+
+            ValidateAssemblyName(assemblyName, nameof(assemblyName));
             return new XamlAccessLevel(assemblyName.FullName, null);
         }
 
@@ -46,6 +48,7 @@ namespace System.Xaml.Permissions
             {
                 throw new ArgumentNullException(nameof(type));
             }
+
             return new XamlAccessLevel(type.Assembly.FullName, type.FullName);
         }
 
@@ -55,6 +58,7 @@ namespace System.Xaml.Permissions
             {
                 throw new ArgumentNullException(nameof(assemblyQualifiedTypeName));
             }
+
             int nameBoundary = assemblyQualifiedTypeName.IndexOf(',');
             if (nameBoundary < 0)
             {
@@ -64,7 +68,7 @@ namespace System.Xaml.Permissions
             string typeName = assemblyQualifiedTypeName.Substring(0, nameBoundary).Trim();
             string assemblyFullName = assemblyQualifiedTypeName.Substring(nameBoundary + 1).Trim();
             AssemblyName assemblyName = new AssemblyName(assemblyFullName);
-            ValidateAssemblyName(assemblyName, "assemblyQualifiedTypeName");
+            ValidateAssemblyName(assemblyName, nameof(assemblyQualifiedTypeName));
             
             return new XamlAccessLevel(assemblyName.FullName, typeName);
         }
@@ -78,7 +82,7 @@ namespace System.Xaml.Permissions
         
         public AssemblyName AssemblyAccessToAssemblyName
         {
-            get { return new AssemblyName(AssemblyNameString); }
+            get => new AssemblyName(AssemblyNameString);
         }
 
         public string PrivateAccessToTypeName { get; private set; }
@@ -103,7 +107,7 @@ namespace System.Xaml.Permissions
                 throw new ArgumentException(SR.Get(SRID.SecurityXmlMissingAttribute, XmlConstants.AssemblyName), nameof(elem));
             }
             AssemblyName assemblyName = new AssemblyName(assemblyNameString);
-            ValidateAssemblyName(assemblyName, "elem");
+            ValidateAssemblyName(assemblyName, nameof(elem));
 
             string typeName = elem.Attribute(XmlConstants.TypeName);
             if (typeName != null)
@@ -116,8 +120,8 @@ namespace System.Xaml.Permissions
 
         internal bool Includes(XamlAccessLevel other)
         {
-            return other.AssemblyNameString == this.AssemblyNameString &&
-                (other.PrivateAccessToTypeName == null || other.PrivateAccessToTypeName == this.PrivateAccessToTypeName);
+            return other.AssemblyNameString == AssemblyNameString &&
+                (other.PrivateAccessToTypeName == null || other.PrivateAccessToTypeName == PrivateAccessToTypeName);
         }
 
         internal SecurityElement ToXml()

@@ -9,13 +9,13 @@ namespace System.Xaml
 {
     /// <summary>
     /// XamlNode Double Buffering object that multi-threaded access
-    ///  ONE reader and ONE writer.
+    /// ONE reader and ONE writer.
     /// This is the bridge used to Parse on one thread and Build on a second.
     /// </summary>
     public class XamlBackgroundReader : XamlReader, IXamlLineInfo
     {
-        private EventWaitHandle _providerFullEvent;
-        private EventWaitHandle _dataReceivedEvent;
+        private readonly EventWaitHandle _providerFullEvent;
+        private readonly EventWaitHandle _dataReceivedEvent;
 
         private XamlNode[] _incoming;
         private int _inIdx;
@@ -25,16 +25,18 @@ namespace System.Xaml
 
         private XamlNode _currentNode;
 
-        private XamlReader _wrappedReader;
-        private XamlReader _internalReader;
-        private XamlWriter _writer;
+        private readonly XamlReader _wrappedReader;
+        private readonly XamlReader _internalReader;
+        private readonly XamlWriter _writer;
 
-        private bool _wrappedReaderHasLineInfo;
-        private int _lineNumber=0;
-        private int _linePosition=0;
+        private readonly bool _wrappedReaderHasLineInfo;
+        private int _lineNumber = 0;
+        private int _linePosition = 0;
         
         private Thread _thread;
         private Exception _caughtException;
+
+        private const int BufferSize = 64;
 
         public XamlBackgroundReader(XamlReader wrappedReader)
         {
@@ -43,16 +45,11 @@ namespace System.Xaml
                 throw new ArgumentNullException(nameof(wrappedReader));
             }
 
-            Initialize(wrappedReader, 64);
-        }
-
-        private void Initialize(XamlReader wrappedReader, int bufferSize)
-        {
             _providerFullEvent = new EventWaitHandle(false, EventResetMode.AutoReset);
             _dataReceivedEvent = new EventWaitHandle(false, EventResetMode.AutoReset);
 
-            _incoming = new XamlNode[bufferSize];
-            _outgoing = new XamlNode[bufferSize];
+            _incoming = new XamlNode[BufferSize];
+            _outgoing = new XamlNode[BufferSize];
 
             _wrappedReader = wrappedReader;
             _wrappedReaderHasLineInfo = ((IXamlLineInfo)_wrappedReader).HasLineInfo;
@@ -100,7 +97,7 @@ namespace System.Xaml
         {
             try
             {
-                InterruptableTransform(_wrappedReader, _writer, true);
+                InterruptableTransform(_wrappedReader, _writer);
             }
             catch (Exception ex)
             {
@@ -225,16 +222,14 @@ namespace System.Xaml
             return _currentNode;
         }
 
-        private void InterruptableTransform(XamlReader reader, XamlWriter writer, bool closeWriter)
+        private void InterruptableTransform(XamlReader reader, XamlWriter writer)
         {
             IXamlLineInfo xamlLineInfo = reader as IXamlLineInfo;
             IXamlLineInfoConsumer xamlLineInfoConsumer = writer as IXamlLineInfoConsumer;
-            bool shouldPassLineNumberInfo = false;
-            if ((xamlLineInfo != null && xamlLineInfo.HasLineInfo)
-                && (xamlLineInfoConsumer != null && xamlLineInfoConsumer.ShouldProvideLineInfo))
-            {
-                shouldPassLineNumberInfo = true;
-            }
+            Debug.Assert(xamlLineInfo != null, "The constructor throws if the underlying reader is not IXamlLineInfo.");
+            Debug.Assert(xamlLineInfoConsumer != null, "WriteDelegate implements IXamlLineInfoConsumer.");
+
+            bool shouldPassLineNumberInfo = xamlLineInfo.HasLineInfo && xamlLineInfoConsumer.ShouldProvideLineInfo;
             while (reader.Read())
             {
                 if (IsDisposed)
@@ -251,10 +246,7 @@ namespace System.Xaml
                 writer.WriteNode(reader);
             }
 
-            if (closeWriter)
-            {
-                writer.Close();
-            }
+            writer.Close();
         }
 
         public override bool Read() => _internalReader.Read();

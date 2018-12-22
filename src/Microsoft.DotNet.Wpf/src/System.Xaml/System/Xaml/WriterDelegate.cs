@@ -9,7 +9,7 @@ namespace System.Xaml
     /// It turns XamlWriter calls into nodes and passes them up to the
     /// provided _addDelegate.
     /// </summary>
-    internal class WriterDelegate : XamlWriter, IXamlLineInfoConsumer
+    internal sealed class WriterDelegate : XamlWriter, IXamlLineInfoConsumer
     {
         private XamlNodeAddDelegate _addDelegate;
         private XamlLineInfoAddDelegate _addLineInfoDelegate;
@@ -118,7 +118,7 @@ namespace System.Xaml
         {
             if (IsDisposed)
             {
-                throw new ObjectDisposedException(nameof(XamlWriter)); // Can't say ReaderMultiIndexDelegate because its internal.
+                throw new ObjectDisposedException(nameof(XamlWriter)); // Can't say WriterDelegate because it is internal.
             }
         }
     }

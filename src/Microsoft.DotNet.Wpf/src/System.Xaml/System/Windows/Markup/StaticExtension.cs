@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace System.Windows.Markup
 {
     /// <summary>
-    ///  Class for Xaml markup extension for static field and property references.
+    /// Class for Xaml markup extension for static field and property references.
     /// </summary>
     [TypeForwardedFrom("PresentationFramework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     [TypeConverter(typeof(StaticExtensionConverter))]
@@ -17,26 +17,20 @@ namespace System.Windows.Markup
     public class StaticExtension : MarkupExtension 
     {
         /// <summary>
-        ///  Constructor that takes no parameters
+        /// Constructor that takes no parameters
         /// </summary>
         public StaticExtension()
         {
         }
         
         /// <summary>
-        ///  Constructor that takes the member that this is a static reference to.  
-        ///  This string is of the format 
-        ///     Prefix:ClassName.FieldOrPropertyName.  The Prefix is 
-        ///  optional, and refers to the XML prefix in a Xaml file.
+        /// Constructor that takes the member that this is a static reference to.  
+        /// This string is of the format Prefix:ClassName.FieldOrPropertyName.
+        /// The Prefix is optional, and refers to the XML prefix in a Xaml file.
         /// </summary>
-        public StaticExtension(
-            string   member)
+        public StaticExtension(string member)
         {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-            _member = member;
+            _member = member ?? throw new ArgumentNullException(nameof(member));
         }
 
         /// <summary>
@@ -55,7 +49,6 @@ namespace System.Windows.Markup
                 throw new InvalidOperationException(SR.Get(SRID.MarkupExtensionStaticMember));
             }
 
-            object value;
             Type type = MemberType;
             string fieldString = null;
             string memberFullName = null;
@@ -69,7 +62,6 @@ namespace System.Windows.Markup
                 memberFullName = _member;
 
                 // Validate the _member
-
                 int dotIndex = _member.IndexOf('.');
                 if (dotIndex < 0)
                 {
@@ -77,7 +69,6 @@ namespace System.Windows.Markup
                 }
 
                 // Pull out the type substring (this will include any XML prefix, e.g. "av:Button")
-
                 string typeString = _member.Substring(0, dotIndex);
                 if (typeString == string.Empty)
                 {
@@ -85,7 +76,6 @@ namespace System.Windows.Markup
                 }
 
                 // Get the IXamlTypeResolver from the service provider
-
                 if (serviceProvider == null)
                 {
                     throw new ArgumentNullException(nameof(serviceProvider));
@@ -94,15 +84,13 @@ namespace System.Windows.Markup
                 IXamlTypeResolver xamlTypeResolver = serviceProvider.GetService(typeof(IXamlTypeResolver)) as IXamlTypeResolver;
                 if (xamlTypeResolver == null)
                 {
-                    throw new ArgumentException(SR.Get(SRID.MarkupExtensionNoContext, GetType().Name, "IXamlTypeResolver"));
+                    throw new ArgumentException(SR.Get(SRID.MarkupExtensionNoContext, GetType().Name, nameof(IXamlTypeResolver)));
                 }
 
                 // Use the type resolver to get a Type instance
-
                 type = xamlTypeResolver.Resolve(typeString);
 
                 // Get the member name substring
-
                 fieldString = _member.Substring(dotIndex + 1, _member.Length - dotIndex - 1);
                 if (fieldString == string.Empty)
                 {
@@ -111,14 +99,13 @@ namespace System.Windows.Markup
             }
 
             // Use the built-in parser for enum types
-            
             if (type.IsEnum)
             {
                 return Enum.Parse(type, fieldString);
             }
 
             // For other types, reflect
-            if (GetFieldOrPropertyValue(type, fieldString, out value))
+            if (GetFieldOrPropertyValue(type, fieldString, out object value))
             {
                 return value;
             }
@@ -174,33 +161,18 @@ namespace System.Windows.Markup
         [ConstructorArgument("member")]
         public string Member
         {
-            get { return _member; }
-            set 
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                _member = value;
-            }
+            get => _member;
+            set => _member = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         [DefaultValue(null)]
         public Type MemberType
         {
-            get { return _memberType; }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                _memberType = value;
-            }
+            get => _memberType;
+            set => _memberType = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         private string _member;
         private Type _memberType;
     }
 }
-

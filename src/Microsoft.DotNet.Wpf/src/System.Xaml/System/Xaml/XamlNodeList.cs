@@ -17,7 +17,7 @@ namespace System.Xaml
     {
         private List<XamlNode> _nodeList;
         private bool _readMode = false;
-        private XamlWriter _writer;
+        private readonly XamlWriter _writer;
         private bool _hasLineInfo;
 
         public XamlNodeList(XamlSchemaContext schemaContext)
@@ -27,7 +27,8 @@ namespace System.Xaml
                 throw new ArgumentNullException(nameof(schemaContext));
             }
 
-            Initialize(schemaContext, 0);
+            _nodeList = new List<XamlNode>();
+            _writer = new WriterDelegate(Add, AddLineInfo, schemaContext);
         }
 
         public XamlNodeList(XamlSchemaContext schemaContext, int size)
@@ -37,20 +38,7 @@ namespace System.Xaml
                 throw new ArgumentNullException(nameof(schemaContext));
             }
 
-            Initialize(schemaContext, size);
-        }
-
-        private void Initialize(XamlSchemaContext schemaContext, int size)
-        {
-            if (size == 0)
-            {
-                _nodeList = new List<XamlNode>();
-            }
-            else
-            {
-                _nodeList = new List<XamlNode>(size);
-            }
-
+            _nodeList = size == 0 ? new List<XamlNode>() : new List<XamlNode>(size);
             _writer = new WriterDelegate(Add, AddLineInfo, schemaContext);
         }
 
@@ -62,11 +50,8 @@ namespace System.Xaml
             {
                 throw new XamlException(SR.Get(SRID.CloseXamlWriterBeforeReading));
             }
-            if (_writer.SchemaContext == null)
-            {
-                throw new XamlException(SR.Get(SRID.SchemaContextNotInitialized));
-            }
 
+            Debug.Assert(_writer.SchemaContext != null, "SchemaContext is validated in the constructor.");
             return new ReaderMultiIndexDelegate(_writer.SchemaContext, Index, _nodeList.Count, _hasLineInfo);
         }
 

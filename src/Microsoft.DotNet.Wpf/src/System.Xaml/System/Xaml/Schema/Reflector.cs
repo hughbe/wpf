@@ -12,10 +12,6 @@ using System.Windows.Markup;
 
 namespace System.Xaml.Schema
 {
-    // Currently we CustomAttributeFormatException and set _attributeProvider to Member, so that
-    // all future lookups happens via live reflection, which is unified. This logic can be removed
-    // once the CLR fixes the Attribute Unification Bug.
-
     internal abstract class Reflector
     {
         // If _attributeProvider is set, we will use it for all attribute lookups.
@@ -25,8 +21,8 @@ namespace System.Xaml.Schema
 
         internal ICustomAttributeProvider CustomAttributeProvider
         {
-            get { return _attributeProvider.Value; }
-            set { _attributeProvider.Value = value; }
+            get => _attributeProvider.Value;
+            set => _attributeProvider.Value = value;
         }
 
         internal void SetCustomAttributeProviderVolatile(ICustomAttributeProvider value)
@@ -34,9 +30,9 @@ namespace System.Xaml.Schema
             _attributeProvider.SetVolatile(value);
         }
 
-        internal bool CustomAttributeProviderIsSet { get { return _attributeProvider.IsSet; } }
+        internal bool CustomAttributeProviderIsSet => _attributeProvider.IsSet;
 
-        internal bool CustomAttributeProviderIsSetVolatile { get { return _attributeProvider.IsSetVolatile; } }
+        internal bool CustomAttributeProviderIsSetVolatile => _attributeProvider.IsSetVolatile;
 
         protected abstract MemberInfo Member { get; }
 
@@ -71,40 +67,40 @@ namespace System.Xaml.Schema
                 {
                     return null;
                 }
+
                 if (attributeType == typeof(ContentPropertyAttribute))
                 {
                     return ((ContentPropertyAttribute)attributes[0]).Name;
                 }
-                if (attributeType == typeof(RuntimeNamePropertyAttribute))
+                else if (attributeType == typeof(RuntimeNamePropertyAttribute))
                 {
                     return ((RuntimeNamePropertyAttribute)attributes[0]).Name;
                 }
-                if (attributeType == typeof(DictionaryKeyPropertyAttribute))
+                else if (attributeType == typeof(DictionaryKeyPropertyAttribute))
                 {
                     return ((DictionaryKeyPropertyAttribute)attributes[0]).Name;
                 }
-                if (attributeType == typeof(XamlSetMarkupExtensionAttribute))
+                else if (attributeType == typeof(XamlSetMarkupExtensionAttribute))
                 {
                     return ((XamlSetMarkupExtensionAttribute)attributes[0]).XamlSetMarkupExtensionHandler;
                 }
-                if (attributeType == typeof(XamlSetTypeConverterAttribute))
+                else if (attributeType == typeof(XamlSetTypeConverterAttribute))
                 {
                     return ((XamlSetTypeConverterAttribute)attributes[0]).XamlSetTypeConverterHandler;
                 }
-                if (attributeType == typeof(UidPropertyAttribute))
+                else if (attributeType == typeof(UidPropertyAttribute))
                 {
                     return ((UidPropertyAttribute)attributes[0]).Name;
                 }
-                if (attributeType == typeof(XmlLangPropertyAttribute))
+                else if (attributeType == typeof(XmlLangPropertyAttribute))
                 {
                     return ((XmlLangPropertyAttribute)attributes[0]).Name;
                 }
-                if (attributeType == typeof(ConstructorArgumentAttribute))
+                else
                 {
+                    Debug.Assert(attributeType == typeof(ConstructorArgumentAttribute), "Unexpected attribute type requested: " + attributeType.Name);
                     return ((ConstructorArgumentAttribute)attributes[0]).ArgumentName;
                 }
-                Debug.Fail("Unexpected attribute type requested: " + attributeType.Name);
-                return null;
             }
             try
             {
@@ -125,38 +121,27 @@ namespace System.Xaml.Schema
             }
         }
 
-        public IReadOnlyDictionary<char,char> GetBracketCharacterAttributes(Type attributeType)
+        public IReadOnlyDictionary<char,char> GetBracketCharacterAttributes()
         {
             if (CustomAttributeProvider != null)
             {
-                object[] attributes = CustomAttributeProvider.GetCustomAttributes(attributeType, false);
+                object[] attributes = CustomAttributeProvider.GetCustomAttributes(typeof(MarkupExtensionBracketCharactersAttribute), false);
                 if (attributes.Length == 0)
                 {
                     return null;
                 }
 
-                if (attributeType == typeof(MarkupExtensionBracketCharactersAttribute))
+                Dictionary<char, char> bracketCharacterAttributeList = new Dictionary<char, char>();
+                foreach (object attribute in attributes)
                 {
-                    Dictionary<char, char> bracketCharacterAttributeList = new Dictionary<char, char>();
-                    foreach (object attribute in attributes)
-                    {
-                        MarkupExtensionBracketCharactersAttribute bracketCharactersAttribute = (MarkupExtensionBracketCharactersAttribute)attribute;
-                        bracketCharacterAttributeList.Add(bracketCharactersAttribute.OpeningBracket, bracketCharactersAttribute.ClosingBracket);
-                    }
-
-                    return new ReadOnlyDictionary<char, char>(bracketCharacterAttributeList);
+                    MarkupExtensionBracketCharactersAttribute bracketCharactersAttribute = (MarkupExtensionBracketCharactersAttribute)attribute;
+                    bracketCharacterAttributeList.Add(bracketCharactersAttribute.OpeningBracket, bracketCharactersAttribute.ClosingBracket);
                 }
 
-                Debug.Fail("Unexpected attribute type requested: " + attributeType.Name);
-                return null;
+                return new ReadOnlyDictionary<char, char>(bracketCharacterAttributeList);
             }
 
-            if (attributeType == typeof(MarkupExtensionBracketCharactersAttribute))
-            {
-                return TokenizeBracketCharacters(attributeType);
-            }
-
-            return null;
+            return TokenizeBracketCharacters();
         }
 
         public T? GetAttributeValue<T>(Type attributeType) where T : struct
@@ -168,18 +153,18 @@ namespace System.Xaml.Schema
                 {
                     return null;
                 }
+
                 if (attributeType == typeof(DesignerSerializationVisibilityAttribute))
                 {
                     DesignerSerializationVisibility result = ((DesignerSerializationVisibilityAttribute)attributes[0]).Visibility;
                     return (T)(object)result;
                 }
-                if (attributeType == typeof(UsableDuringInitializationAttribute))
+                else
                 {
+                    Debug.Assert(attributeType == typeof(UsableDuringInitializationAttribute), "Unexpected attribute type requested: " + attributeType.Name);
                     bool result = ((UsableDuringInitializationAttribute)attributes[0]).Usable;
                     return (T)(object)result;
                 }
-                Debug.Fail("Unexpected attribute type requested: " + attributeType.Name);
-                return null;
             }
             try
             {
@@ -206,21 +191,21 @@ namespace System.Xaml.Schema
                 {
                     return null;
                 }
+
                 if (attributeType == typeof(TypeConverterAttribute))
                 {
                     string typeName = ((TypeConverterAttribute)attributes[0]).ConverterTypeName;
-                    return XamlNamespace.GetTypeFromFullTypeName(typeName);
+                    return Type.GetType(typeName);
                 }
-                if (attributeType == typeof(MarkupExtensionReturnTypeAttribute))
+                else if (attributeType == typeof(MarkupExtensionReturnTypeAttribute))
                 {
                     return ((MarkupExtensionReturnTypeAttribute)attributes[0]).ReturnType;
                 }
-                if (attributeType == typeof(ValueSerializerAttribute))
+                else
                 {
+                    Debug.Assert(attributeType == typeof(ValueSerializerAttribute), "Unexpected attribute type requested: " + attributeType.Name);
                     return ((ValueSerializerAttribute)attributes[0]).ValueSerializerType;
                 }
-                Debug.Fail("Unexpected attribute type requested: " + attributeType.Name);
-                return null;
             }
             try
             {
@@ -250,8 +235,8 @@ namespace System.Xaml.Schema
                 Debug.Assert(attributeType == typeof(XamlDeferLoadAttribute));
                 Debug.Assert(count == 2);
                 XamlDeferLoadAttribute tca = (XamlDeferLoadAttribute)attributes[0];
-                Type converterType = XamlNamespace.GetTypeFromFullTypeName(tca.LoaderTypeName);
-                Type contentType = XamlNamespace.GetTypeFromFullTypeName(tca.ContentTypeName);
+                Type converterType = Type.GetType(tca.LoaderTypeName);
+                Type contentType = Type.GetType(tca.ContentTypeName);
                 return new Type[] { converterType, contentType };
             }
             try
@@ -289,19 +274,15 @@ namespace System.Xaml.Schema
                     }
                     return result;
                 }
-
-                if (attributeType == typeof(DependsOnAttribute))
+                else
                 {
+                    Debug.Assert(attributeType == typeof(DependsOnAttribute), "Unexpected attribute type requested: " + attributeType.Name);
                     foreach (DependsOnAttribute attribute in attributes)
                     {
                         result.Add((T)(object)attribute.Name);
                     }
                     return result;
                 }
-
-                Debug.Fail("Unexpected attribute type requested: " + attributeType.Name);
-                return null;
-
             }
             try
             {
@@ -334,9 +315,9 @@ namespace System.Xaml.Schema
         protected static bool? GetFlag(int bitMask, int bitToCheck)
         {
             int validBit = GetValidMask(bitToCheck);
-            if (0 != (bitMask & validBit))
+            if ((bitMask & validBit) != 0)
             {
-                return 0 != (bitMask & bitToCheck);
+                return (bitMask & bitToCheck) != 0;
             }
             return null;
         }
@@ -386,25 +367,20 @@ namespace System.Xaml.Schema
             }
         }
 
-        private ReadOnlyDictionary<char, char> TokenizeBracketCharacters(Type attributeType)
+        private ReadOnlyDictionary<char, char> TokenizeBracketCharacters()
         {
-            if (attributeType == typeof(MarkupExtensionBracketCharactersAttribute))
+            IList<CustomAttributeData> attrDataList = new List<CustomAttributeData>();
+            GetAttributes(typeof(MarkupExtensionBracketCharactersAttribute), attrDataList);
+
+            Dictionary<char, char> bracketCharacterList = new Dictionary<char, char>();
+            foreach (CustomAttributeData attributeData in attrDataList)
             {
-                IList<CustomAttributeData> attrDataList = new List<CustomAttributeData>();
-                GetAttributes(attributeType, attrDataList);
-
-                Dictionary<char, char> bracketCharacterList = new Dictionary<char, char>();
-                foreach (CustomAttributeData attributeData in attrDataList)
-                {
-                    char openingBracket = (char) (attributeData.ConstructorArguments[0].Value);
-                    char closingBracket = (char) (attributeData.ConstructorArguments[1].Value);
-                    bracketCharacterList.Add(openingBracket, closingBracket);
-                }
-
-                return new ReadOnlyDictionary<char, char>(bracketCharacterList);
+                char openingBracket = (char)(attributeData.ConstructorArguments[0].Value);
+                char closingBracket = (char)(attributeData.ConstructorArguments[1].Value);
+                bracketCharacterList.Add(openingBracket, closingBracket);
             }
 
-            return null;
+            return new ReadOnlyDictionary<char, char>(bracketCharacterList);
         }
 
         private Type ExtractType(CustomAttributeData cad)
@@ -416,7 +392,7 @@ namespace System.Xaml.Schema
             }
             if (result == null)
             {
-                ThrowInvalidMetadata(cad, 1, typeof(Type));
+                throw GetInvalidMetadataException(cad, 1, typeof(Type));
             }
             return result;
         }
@@ -425,7 +401,7 @@ namespace System.Xaml.Schema
         {
             if (cad.ConstructorArguments.Count != count)
             {
-                ThrowInvalidMetadata(cad, count, typeof(Type));
+                throw GetInvalidMetadataException(cad, count, typeof(Type));
             }
             Type[] result = new Type[count];
             for (int i = 0; i < count; i++)
@@ -433,7 +409,7 @@ namespace System.Xaml.Schema
                 result[i] = ExtractType(cad.ConstructorArguments[i]);
                 if (result[i] == null)
                 {
-                    ThrowInvalidMetadata(cad, count, typeof(Type));
+                    throw GetInvalidMetadataException(cad, count, typeof(Type));
                 }
             }
             return result;
@@ -448,7 +424,7 @@ namespace System.Xaml.Schema
             else if (arg.ArgumentType == typeof(string))
             {
                 string typeName = (string)arg.Value;
-                return XamlNamespace.GetTypeFromFullTypeName(typeName);
+                return Type.GetType(typeName);
             }
             return null;
         }
@@ -463,7 +439,7 @@ namespace System.Xaml.Schema
             if (cad.ConstructorArguments.Count > 1 ||
                 !TypesAreEqual(cad.ConstructorArguments[0].ArgumentType, typeof(T)))
             {
-                ThrowInvalidMetadata(cad, 1, typeof(T));
+                throw GetInvalidMetadataException(cad, 1, typeof(T));
             }
             return (T)cad.ConstructorArguments[0].Value;
         }
@@ -501,9 +477,9 @@ namespace System.Xaml.Schema
             }
         }
 
-        protected void ThrowInvalidMetadata(CustomAttributeData cad, int expectedCount, Type expectedType)
+        protected Exception GetInvalidMetadataException(CustomAttributeData cad, int expectedCount, Type expectedType)
         {
-            throw new XamlSchemaException(SR.Get(SRID.UnexpectedConstructorArg,
+            return new XamlSchemaException(SR.Get(SRID.UnexpectedConstructorArg,
                 cad.Constructor.DeclaringType, Member, expectedCount, expectedType));
         }
     }

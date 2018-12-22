@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Xaml.Schema;
 
@@ -13,13 +14,14 @@ namespace MS.Internal.Xaml.Parser
     class GenericTypeNameParser
     {
         [Serializable]
-        class TypeNameParserException : Exception
+        private class TypeNameParserException : Exception
         {
             public TypeNameParserException(string message)
                 : base(message)
             {
             }
 
+            [ExcludeFromCodeCoverage]
             protected TypeNameParserException(SerializationInfo si, StreamingContext sc) : base(si, sc)
             {
             }
@@ -28,7 +30,7 @@ namespace MS.Internal.Xaml.Parser
         private GenericTypeNameScanner _scanner;
         private string _inputText;
         private Func<string, string> _prefixResolver;
-        Stack<TypeNameFrame> _stack;
+        private Stack<TypeNameFrame> _stack;
 
         public GenericTypeNameParser(Func<string, string> prefixResolver)
         {
@@ -56,11 +58,12 @@ namespace MS.Internal.Xaml.Parser
             }
 
             string ns = prefixResolver(prefix);
-            if (String.IsNullOrEmpty(ns))
+            if (string.IsNullOrEmpty(ns))
             {
                 error = SR.Get(SRID.PrefixNotFound, prefix);
                 return null;
             }
+
             XamlTypeName xamlTypeName = new XamlTypeName(ns, simpleName);
             return xamlTypeName;
         }
@@ -79,7 +82,7 @@ namespace MS.Internal.Xaml.Parser
                 P_XamlTypeName();
                 if (_scanner.Token != GenericTypeNameScannerToken.NONE)
                 {
-                    ThrowOnBadInput();
+                    throw GetBadInputException();
                 }
             }
             catch (TypeNameParserException ex)
@@ -108,7 +111,7 @@ namespace MS.Internal.Xaml.Parser
                 P_XamlTypeNameList();
                 if (_scanner.Token != GenericTypeNameScannerToken.NONE)
                 {
-                    ThrowOnBadInput();
+                    throw GetBadInputException();
                 }
             }
             catch (TypeNameParserException ex)
@@ -138,7 +141,7 @@ namespace MS.Internal.Xaml.Parser
             // Required
             if (_scanner.Token != GenericTypeNameScannerToken.NAME)
             {
-                ThrowOnBadInput();
+                throw GetBadInputException();
             }
             P_SimpleTypeName();
 
@@ -178,7 +181,7 @@ namespace MS.Internal.Xaml.Parser
                 // IF there was a colon then there must be a name following.
                 if (_scanner.Token != GenericTypeNameScannerToken.NAME)
                 {
-                    ThrowOnBadInput();
+                    throw GetBadInputException();
                 }
                 name = _scanner.MultiCharTokenText;
                 _scanner.Read();
@@ -201,7 +204,7 @@ namespace MS.Internal.Xaml.Parser
             // Required
             if (_scanner.Token != GenericTypeNameScannerToken.CLOSE)
             {
-                ThrowOnBadInput();
+                throw GetBadInputException();
             }
             _scanner.Read();
         }
@@ -245,7 +248,7 @@ namespace MS.Internal.Xaml.Parser
             while (_scanner.Token == GenericTypeNameScannerToken.SUBSCRIPT);
         }
 
-        private void ThrowOnBadInput()
+        private Exception GetBadInputException()
         {
             throw new TypeNameParserException(SR.Get(SRID.InvalidCharInTypeName, _scanner.ErrorCurrentChar, _inputText));
         }
@@ -292,38 +295,26 @@ namespace MS.Internal.Xaml.Parser
 
         private XamlTypeName CollectNameFromStack()
         {
-            if (_stack.Count != 1)
-            {
-                throw new TypeNameParserException(SR.Get(SRID.InvalidTypeString, _inputText));
-            }
+            Debug.Assert(_stack.Count == 1);
 
             TypeNameFrame frame = _stack.Peek();
-            if (frame.TypeArgs.Count != 1)
-            {
-                throw new TypeNameParserException(SR.Get(SRID.InvalidTypeString, _inputText));
-            }
+            Debug.Assert(frame.TypeArgs.Count == 1);
 
-            XamlTypeName xamlTypeName = frame.TypeArgs[0];
-            return xamlTypeName;
+            return frame.TypeArgs[0];
         }
 
         private IList<XamlTypeName> CollectNameListFromStack()
         {
-            if (_stack.Count != 1)
-            {
-                throw new TypeNameParserException(SR.Get(SRID.InvalidTypeString, _inputText));
-            }
+            Debug.Assert(_stack.Count == 1);
 
             TypeNameFrame frame = _stack.Peek();
-
-            List<XamlTypeName> xamlTypeNameList = frame.TypeArgs;
-            return xamlTypeNameList;
+            return frame.TypeArgs;
         }
     }
 
     class TypeNameFrame
     {
-        List<XamlTypeName> _typeArgs;
+        private List<XamlTypeName> _typeArgs;
 
         public string Namespace { get; set; }
         public string Name { get; set; }

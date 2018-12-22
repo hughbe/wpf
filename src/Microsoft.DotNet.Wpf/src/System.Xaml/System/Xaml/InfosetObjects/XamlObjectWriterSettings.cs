@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Windows.Markup;
 using System.Xaml.Permissions;
+using System.Windows.Markup;
 
 namespace System.Xaml
 {
@@ -19,6 +19,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(settings));
             }
+
             AfterBeginInitHandler = settings.AfterBeginInitHandler;
             BeforePropertiesHandler = settings.BeforePropertiesHandler;
             AfterPropertiesHandler = settings.AfterPropertiesHandler;
@@ -45,7 +46,7 @@ namespace System.Xaml
         public EventHandler<XamlSetValueEventArgs> XamlSetValueHandler { get; set; }
 #endif
 
-        public Object RootObjectInstance { get; set; }
+        public object RootObjectInstance { get; set; }
         public bool IgnoreCanConvert { get; set; }
         public INameScope ExternalNameScope { get; set; }
         public bool SkipDuplicatePropertyCheck { get; set; }

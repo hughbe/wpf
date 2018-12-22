@@ -1032,11 +1032,6 @@
         <target state="new">savedContext.SchemaContext cannot be null</target>
         <note />
       </trans-unit>
-      <trans-unit id="SchemaContextNotInitialized">
-        <source>SchemaContext on writer must be initialized before accessing the reader.</source>
-        <target state="new">SchemaContext on writer must be initialized before accessing the reader.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SchemaContextNull">
         <source>SchemaContext cannot be null.</source>
         <target state="new">SchemaContext cannot be null.</target>

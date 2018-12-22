@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
 using System.IO;
+using System.Globalization;
 using System.Xml;
 
 namespace System.Xaml
@@ -157,13 +157,13 @@ namespace System.Xaml
             return sw.ToString();
         }
 
-        public static void Save(String fileName, object instance)
+        public static void Save(string fileName, object instance)
         {
             if (fileName == null)
             {
                 throw new ArgumentNullException(nameof(fileName));
             }
-            //
+
             // At this point it can only be empty
             if (string.IsNullOrEmpty(fileName))
             {

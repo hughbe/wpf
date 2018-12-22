@@ -2,14 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/***************************************************************************\
-*
-*
-*  Class for Xaml markup extension for Arrays
-*
-*
-\***************************************************************************/
-
 using System.Collections;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -25,23 +17,18 @@ namespace System.Windows.Markup
     public class ArrayExtension : MarkupExtension
     {
         /// <summary>
-        ///  Constructor that takes no parameters.  This creates an empty array.
+        ///  Constructor that takes no parameters. This creates an empty array.
         /// </summary>
         public ArrayExtension()
         {
         }
         
         /// <summary>
-        ///  Constructor that takes one parameter.  This initializes the type of the array.
+        /// Constructor that takes one parameter. This initializes the type of the array.
         /// </summary>
-        public ArrayExtension(
-            Type arrayType)
+        public ArrayExtension(Type arrayType)
         {
-            if (arrayType == null)
-            {
-                throw new ArgumentNullException(nameof(arrayType));
-            }
-            _arrayType = arrayType;
+            _arrayType = arrayType ?? throw new ArgumentNullException(nameof(arrayType));
         }
 
         /// <summary>
@@ -66,10 +53,7 @@ namespace System.Windows.Markup
         ///<param name="value">
         /// Object to add to the end of the array.
         ///</param>
-        public void AddChild(object value)
-        {
-            _arrayList.Add(value);
-        }
+        public void AddChild(object value) => _arrayList.Add(value);
 
         ///<summary>
         /// Called to Add a text as a new array item.  This will append the object to the end
@@ -78,10 +62,7 @@ namespace System.Windows.Markup
         ///<param name="text">
         /// Text to Add to the end of the array
         ///</param> 
-        public void AddText(string text)
-        {
-            AddChild(text);
-        }
+        public void AddText(string text) => AddChild(text);
 
         ///<summary>
         /// Get and set the type of array to be created when calling ProvideValue
@@ -89,18 +70,15 @@ namespace System.Windows.Markup
         [ConstructorArgument("type")]
         public Type Type
         {
-            get { return _arrayType; }
-            set { _arrayType = value; }
+            get => _arrayType;
+            set => _arrayType = value;
         }
 
         /// <summary>
         /// An IList accessor to the contents of the array
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public IList Items
-        {
-            get { return _arrayList; }
-        }
+        public IList Items => _arrayList;
 
         /// <summary>
         ///  Return an array that is sized to the number of objects added to the ArrayExtension.
@@ -115,26 +93,21 @@ namespace System.Windows.Markup
             {
                 throw new InvalidOperationException(SR.Get(SRID.MarkupExtensionArrayType));
             }
-            
-            object retArray = null;
 
             try
             {
-                retArray = _arrayList.ToArray(_arrayType);
+                return _arrayList.ToArray(_arrayType);
             }
             catch (InvalidCastException)
             {
                 // If an element was added to the ArrayExtension that does not agree with the
-                // ArrayType, then an InvalidCastException will occur.  Generate a more
-                // meaningful error for this case.
+                // ArrayType, then an InvalidCastException will occur.
+                /// Generate a more meaningful error for this case.
                 throw new InvalidOperationException(SR.Get(SRID.MarkupExtensionArrayBadType, _arrayType.Name));
             }
-
-            return retArray;
         }
 
         private ArrayList _arrayList = new ArrayList();
-        private Type      _arrayType;
-
+        private Type _arrayType;
     }
 }

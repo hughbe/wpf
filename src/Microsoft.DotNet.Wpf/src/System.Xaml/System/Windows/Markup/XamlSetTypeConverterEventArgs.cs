@@ -38,10 +38,9 @@ namespace System.Windows.Markup
             if (CurrentType != null)
             {
                 XamlType baseType = CurrentType.BaseType;
-
                 if (baseType != null)
                 {
-                    this.CurrentType = baseType;
+                    CurrentType = baseType;
                     if (baseType.SetTypeConverterHandler != null)
                     {
                         baseType.SetTypeConverterHandler(TargetObject, this);
