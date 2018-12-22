@@ -1390,6 +1390,10 @@ namespace System.Xaml
                 XamlSchemaContext schemaContext = (XamlSchemaContext)_schemaContextRef.Target;
                 if (schemaContext != null)
                 {
+                    if (new Diagnostics.StackTrace().ToString().Contains("amlSchemaContextTests"))
+                    {
+                        Console.WriteLine(new Diagnostics.StackTrace());
+                    }
                     schemaContext.SchemaContextAssemblyLoadEventHandler(sender, args);
                 }
             }
