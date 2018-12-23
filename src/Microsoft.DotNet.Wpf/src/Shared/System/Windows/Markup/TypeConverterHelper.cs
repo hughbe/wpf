@@ -19,22 +19,15 @@ namespace System.Xaml
 namespace System.Windows.Markup
 #endif
 {
-
     /// <summary>
     /// Class that provides functionality to obtain a TypeConverter from a property or the
     /// type of the property, based on logic similar to TypeDescriptor.GetConverter.
     /// </summary>
     internal static class TypeConverterHelper
     {
-        private static CultureInfo invariantEnglishUS = CultureInfo.InvariantCulture;
+        private static CultureInfo s_invariantEnglishUS = CultureInfo.InvariantCulture;
 
-        internal static CultureInfo InvariantEnglishUS
-        {
-            get
-            {
-                return invariantEnglishUS;
-            }
-        }
+        internal static CultureInfo InvariantEnglishUS => s_invariantEnglishUS;
 
 #if !SYSTEM_XAML
         internal static MemberInfo GetMemberInfoForPropertyConverter(object dpOrPiOrMi)
