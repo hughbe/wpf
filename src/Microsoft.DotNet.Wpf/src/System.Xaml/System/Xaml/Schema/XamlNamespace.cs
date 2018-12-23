@@ -11,7 +11,7 @@ using MS.Internal.Xaml.Parser;
 
 namespace System.Xaml.Schema
 {
-    class XamlNamespace
+    internal class XamlNamespace
     {
         public readonly XamlSchemaContext SchemaContext;
 
@@ -46,21 +46,12 @@ namespace System.Xaml.Schema
             _typeCache = XamlSchemaContext.CreateDictionary<string, XamlType>();
         }
 
-        public bool IsResolved
-        {
-            get { return (null != _assemblyNamespaces); }
-        }
+        public bool IsResolved => _assemblyNamespaces != null;
 
         public ICollection<XamlType> GetAllXamlTypes()
         {
-            if (_allPublicTypes == null)
-            {
-                _allPublicTypes = LookupAllTypes();
-            }
-            return _allPublicTypes;
+            return _allPublicTypes ?? (_allPublicTypes = LookupAllTypes());
         }
-
-        #region GetXamlType
 
         public XamlType GetXamlType(string typeName, params XamlType[] typeArgs)
         {
@@ -68,6 +59,7 @@ namespace System.Xaml.Schema
             {
                 return null;
             }
+
             string fallbackName = GetTypeExtensionName(typeName);
             if (typeArgs == null || typeArgs.Length == 0)
             {
@@ -98,10 +90,12 @@ namespace System.Xaml.Schema
 
             // And save it in our cache
             xamlType = SchemaContext.GetXamlType(type);
-            if (xamlType != null)
+            if (xamlType == null)
             {
-                xamlType = XamlSchemaContext.TryAdd(_typeCache, typeName, xamlType);
+                return null;
             }
+
+            xamlType = XamlSchemaContext.TryAdd(_typeCache, typeName, xamlType);
             return xamlType;
         }
 
@@ -109,34 +103,32 @@ namespace System.Xaml.Schema
         {
             Debug.Assert(typeArgs.Length > 0, "This method should only be called for generic types.");
 
-            // Can't get an array of open generic and then call MakeGenericType on it.
-            // So we need to process subscripts on generics ourselves.
+            // It is not possible to get an array of open generic and then call
+            // MakeGenericType on it so we need to process array subscripts.
             string subscript;
             typeName = GenericTypeNameScanner.StripSubscript(typeName, out subscript);
             typeName = typeName + KnownStrings.GraveQuote + typeArgs.Length;
 
-            // Get the open generic
-            Type openType = null;
+            // Get the open generic type.
             XamlType openXamlType = TryGetXamlType(typeName);
-            if (openXamlType != null)
-            {
-                openType = openXamlType.UnderlyingType;
-            }
+            Type openType = openXamlType?.UnderlyingType;
             if (openType == null)
             {
                 return null;
             }
 
-            // Close it
+            // Close the open generic type.
             Type closedType = openType.MakeGenericType(typeArgs);
             if (!string.IsNullOrEmpty(subscript))
             {
                 closedType = MakeArrayType(closedType, subscript);
                 if (closedType == null)
                 {
-                    return null; // invalid subscript
+                    // Invalid array subscript.
+                    return null;
                 }
             }
+
             return SchemaContext.GetXamlType(closedType);
         }
 
@@ -149,8 +141,10 @@ namespace System.Xaml.Schema
                 int rank = GenericTypeNameScanner.ParseSubscriptSegment(subscript, ref pos);
                 if (rank == 0)
                 {
-                    return null; // subscript parse error
+                    // Invalid array subscript.
+                    return null;
                 }
+
                 type = (rank == 1) ? type.MakeArrayType() : type.MakeArrayType(rank);
             }
             while (pos < subscript.Length);
@@ -159,7 +153,7 @@ namespace System.Xaml.Schema
 
         private Type[] ConvertArrayOfXamlTypesToTypes(XamlType[] typeArgs)
         {
-            Type[] clrTypeArgs = new Type[typeArgs.Length];
+            var clrTypeArgs = new Type[typeArgs.Length];
             for (int n = 0; n < typeArgs.Length; n++)
             {
                 // Checking for nulls and unknowns is done in public API layer before we ever get here
@@ -171,23 +165,12 @@ namespace System.Xaml.Schema
             return clrTypeArgs;
         }
 
-        #endregion
-
         internal int RevisionNumber
         {
             // The only external mutation we allow is adding new namespaces. So the count of
             // namespaces also serves as a revision number.
-            get { return (_assemblyNamespaces != null) ? _assemblyNamespaces.Count : 0; }
+            get => (_assemblyNamespaces != null) ? _assemblyNamespaces.Count : 0;
         }
-
-        // ================ Internal Static functions ======================================
-
-        internal static Type GetTypeFromFullTypeName(string fullName)
-        {
-            return Type.GetType(fullName);
-        }
-
-        // ======================================================
 
         private Type TryGetType(string typeName)
         {
@@ -272,7 +255,9 @@ namespace System.Xaml.Schema
 
                 Type type = asm.GetType(longName);
                 if (type != null)
+                {
                     return type;
+                }
             }
             return null;
         }
