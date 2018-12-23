@@ -107,11 +107,13 @@ namespace System.Xaml.Schema
 
         private XamlType TryGetXamlType(string typeName, Type[] typeArgs)
         {
+            Debug.Assert(typeArgs.Length > 0, "This method should only be called for generic types.");
+
             // Can't get an array of open generic and then call MakeGenericType on it.
             // So we need to process subscripts on generics ourselves.
             string subscript;
             typeName = GenericTypeNameScanner.StripSubscript(typeName, out subscript);
-            typeName = MangleGenericTypeName(typeName, typeArgs.Length);
+            typeName = typeName + KnownStrings.GraveQuote + typeArgs.Length;
 
             // Get the open generic
             Type openType = null;
@@ -153,11 +155,6 @@ namespace System.Xaml.Schema
             }
             while (pos < subscript.Length);
             return type;
-        }
-
-        private static string MangleGenericTypeName(string typeName, int paramNum)
-        {
-            return (paramNum == 0) ? null : typeName + KnownStrings.GraveQuote + paramNum;
         }
 
         private Type[] ConvertArrayOfXamlTypesToTypes(XamlType[] typeArgs)
