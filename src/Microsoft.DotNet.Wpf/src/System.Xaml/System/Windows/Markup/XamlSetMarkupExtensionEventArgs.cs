@@ -15,7 +15,7 @@ namespace System.Windows.Markup
             ServiceProvider = serviceProvider;
         }
 
-        public MarkupExtension MarkupExtension { get { return Value as MarkupExtension; } }
+        public MarkupExtension MarkupExtension => Value as MarkupExtension;
         public IServiceProvider ServiceProvider { get; private set; }
 
         internal XamlSetMarkupExtensionEventArgs(XamlMember member,
@@ -33,10 +33,9 @@ namespace System.Windows.Markup
             if (CurrentType != null)
             {
                 XamlType baseType = CurrentType.BaseType;
-
                 if (baseType != null)
                 {
-                    this.CurrentType = baseType;
+                    CurrentType = baseType;
                     if (baseType.SetMarkupExtensionHandler != null)
                     {
                         baseType.SetMarkupExtensionHandler(TargetObject, this);

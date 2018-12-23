@@ -2,21 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/***************************************************************************\
-*
-*
-*  Class for Xaml markup extension for a Type reference
-*
-*
-\***************************************************************************/
-
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace System.Windows.Markup
 {
     /// <summary>
-    ///  Class for Xaml markup extension for a Type reference.  
+    /// Class for Xaml markup extension for a Type reference.  
     /// </summary>
     [TypeForwardedFrom("PresentationFramework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     [TypeConverter(typeof(TypeExtensionConverter))]
@@ -24,23 +16,18 @@ namespace System.Windows.Markup
     public class TypeExtension : MarkupExtension 
     {
         /// <summary>
-        ///  Default Constructor 
+        /// Default Constructor 
         /// </summary>
         public TypeExtension()
         {
         }
         
         /// <summary>
-        ///  Constructor that takes a type name
+        /// Constructor that takes a type name
         /// </summary>
         public TypeExtension(string typeName)
         {
-            if (typeName == null)
-            {
-                throw new ArgumentNullException(nameof(typeName));
-            }
-            
-            _typeName = typeName;
+            _typeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
         }
 
         /// <summary>
@@ -48,13 +35,7 @@ namespace System.Windows.Markup
         /// </summary>
         public TypeExtension(Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            _type = type;
-            // we would like to set TypeName here, but we can't because we can't resolve its namespace
+            _type = type ?? throw new ArgumentNullException(nameof(type));
         }
 
         /// <summary>
@@ -69,62 +50,51 @@ namespace System.Windows.Markup
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             // If a type was supplied, no context nor type name are needed
-
             if (_type != null)
             {
                 return _type;
             }
 
-            // Validate the initialization
-            
+            // Validate the initialization.
             if (_typeName == null)
             {
                 throw new InvalidOperationException(SR.Get(SRID.MarkupExtensionTypeName));
             }
 
-            // Get the IXamlTypeResolver from the service provider
-
+            // Get the IXamlTypeResolver from the service provider.
             if (serviceProvider == null)
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }            
 
             IXamlTypeResolver xamlTypeResolver = serviceProvider.GetService(typeof(IXamlTypeResolver)) as IXamlTypeResolver;
-            if( xamlTypeResolver == null )
+            if( xamlTypeResolver == null)
             {
-                throw new InvalidOperationException( SR.Get(SRID.MarkupExtensionNoContext, GetType().Name, "IXamlTypeResolver" ));
+                throw new InvalidOperationException(SR.Get(SRID.MarkupExtensionNoContext, GetType().Name, nameof(IXamlTypeResolver)));
             }
 
             // Get the type
-            
             _type = xamlTypeResolver.Resolve(_typeName);
-
             if (_type == null)
             {
                 throw new InvalidOperationException(SR.Get(SRID.MarkupExtensionTypeNameBad, _typeName));
             }
             
             return _type;
-            // we could cash the result of type as _type, but it might cause some problems, and in theory we shouldn't need to
         }
 
         /// <summary>
-        ///  The typename represented by this markup extension.  The name has the format
-        ///  Prefix:Typename, where Prefix is the xml namespace prefix for this type.
+        /// The typename represented by this markup extension.  The name has the format
+        /// Prefix:Typename, where Prefix is the xml namespace prefix for this type.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string TypeName 
         {
-            get { return _typeName; }
+            get => _typeName;
             set 
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                _typeName = value;
-                _type = null; // so that ProvideValue does not use the existing type
+                _typeName = value ?? throw new ArgumentNullException(nameof(value));
+                _type = null;
             }
         }
 
@@ -135,16 +105,11 @@ namespace System.Windows.Markup
         [ConstructorArgument("type")]
         public Type Type
         {
-            get { return _type; }
+            get => _type;
             set 
-            { 
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                _type = value; 
-                _typeName = null; // so that ProvideValue does not use the existing typeName
+            {
+                _type = value ?? throw new ArgumentNullException(nameof(value)); 
+                _typeName = null;
             }
         }
 
@@ -152,4 +117,3 @@ namespace System.Windows.Markup
         private Type _type;
     }
 }
-
