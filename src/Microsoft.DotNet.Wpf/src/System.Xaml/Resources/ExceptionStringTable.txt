@@ -206,7 +206,6 @@ InvalidXamlMemberName='{0}' is not a valid XAML member name.
 ParentlessPropertyElement=The property element '{0}' is not contained by an object element.
 
 ; XamlBackgroundReader
-SchemaContextNotInitialized=SchemaContext on writer must be initialized before accessing the reader.
 ThreadAlreadyStarted=Thread is already started.
 
 ; ReaderBaseDelegate

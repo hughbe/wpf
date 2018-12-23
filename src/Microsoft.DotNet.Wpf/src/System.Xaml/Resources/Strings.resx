@@ -594,9 +594,6 @@
   <data name="ParentlessPropertyElement" xml:space="preserve">
     <value>The property element '{0}' is not contained by an object element.</value>
   </data>
-  <data name="SchemaContextNotInitialized" xml:space="preserve">
-    <value>SchemaContext on writer must be initialized before accessing the reader.</value>
-  </data>
   <data name="ThreadAlreadyStarted" xml:space="preserve">
     <value>Thread is already started.</value>
   </data>
