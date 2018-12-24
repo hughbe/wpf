@@ -208,7 +208,7 @@ namespace MS.Internal.Xaml.Parser
 
         private void State_InName()
         {
-            if(IsAtEndOfInput || IsWhitespaceChar(CurrentChar) || CurrentChar == OpenBracket)
+            if (IsWhitespaceChar(CurrentChar) || CurrentChar == OpenBracket)
             {
                 _token = GenericTypeNameScannerToken.NAME;
                 _state = State.START;
@@ -259,13 +259,6 @@ namespace MS.Internal.Xaml.Parser
 
         private void State_InSubscript()
         {
-            if (IsAtEndOfInput)
-            {
-                _token = GenericTypeNameScannerToken.ERROR;
-                _state = State.START;
-                return;
-            }
-
             switch (CurrentChar)
             {
                 case Comma:
@@ -295,7 +288,7 @@ namespace MS.Internal.Xaml.Parser
 
         private void StartMultiCharToken()
         {
-            Debug.Assert(_multiCharTokenStartIdx == -1 && _multiCharTokenLength == 0);
+            Debug.Assert(_multiCharTokenStartIdx <= 0);
 
             _multiCharTokenStartIdx = _idx;
             _multiCharTokenLength = 1;
@@ -303,7 +296,7 @@ namespace MS.Internal.Xaml.Parser
 
         private void AddToMultiCharToken()
         {
-            Debug.Assert(_multiCharTokenStartIdx != -1 && _multiCharTokenLength > 0);
+            Debug.Assert(_multiCharTokenLength > 0);
 
             _multiCharTokenLength += 1;
         }

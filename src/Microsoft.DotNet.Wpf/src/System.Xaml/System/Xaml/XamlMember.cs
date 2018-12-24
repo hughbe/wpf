@@ -593,11 +593,8 @@ namespace System.Xaml
                     return SchemaContext.GetValueConverter<XamlDeferringLoader>(loaderTypes[0], null);
                 }
             }
-            if (this.Type != null)
-            {
-                return this.Type.DeferringLoader;
-            }
-            return null;
+            
+            return Type.DeferringLoader;
         }
 
         protected virtual IList<XamlMember> LookupDependsOn()
@@ -733,7 +730,7 @@ namespace System.Xaml
                     result = SchemaContext.GetValueConverter<TypeConverter>(converterType, null);
                 }
             }
-            if (result == null && this.Type != null)
+            if (result == null)
             {
                 result = Type.TypeConverter;
             }
@@ -752,7 +749,7 @@ namespace System.Xaml
                     result = SchemaContext.GetValueConverter<ValueSerializer>(converterType, null);
                 }
             }
-            if (result == null && this.Type != null)
+            if (result == null)
             {
                 result = Type.ValueSerializer;
             }
@@ -768,7 +765,7 @@ namespace System.Xaml
         {
             if (AreAttributesAvailable)
             {
-                IReadOnlyDictionary<char, char> bracketCharactersList = _reflector.GetBracketCharacterAttributes(typeof(MarkupExtensionBracketCharactersAttribute));
+                IReadOnlyDictionary<char, char> bracketCharactersList = _reflector.GetBracketCharacterAttributes();
                 if (bracketCharactersList != null)
                 {
                     _reflector.MarkupExtensionBracketCharactersArgument = bracketCharactersList;
@@ -978,20 +975,11 @@ namespace System.Xaml
                 case BoolMemberBits.Ambient:
                     result = LookupIsAmbient();
                     break;
-                case BoolMemberBits.Event:
-                    result = LookupIsEvent();
-                    break;
                 case BoolMemberBits.ReadOnly:
                     result = LookupIsReadOnly();
                     break;
-                case BoolMemberBits.ReadPublic:
-                    result = LookupIsReadPublic();
-                    break;
                 case BoolMemberBits.WriteOnly:
                     result = LookupIsWriteOnly();
-                    break;
-                case BoolMemberBits.WritePublic:
-                    result = LookupIsWritePublic();
                     break;
                 default:
                     Debug.Fail("Enum out of range");

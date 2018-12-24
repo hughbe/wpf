@@ -48,15 +48,10 @@ namespace System.Xaml
                     {
                         return true;   // This is the common/fast path
                     }
-                    // else do the NONE node stuff.
-                    if (_currentNode.LineInfo != null)
-                    {
-                        _currentLineInfo = _currentNode.LineInfo;
-                    }
-                    else if (_currentNode.IsEof)
-                    {
-                        break;
-                    }
+
+                    Debug.Assert(!_currentNode.IsEof, "EOF nodes are not added to the node list in the index delegate.");
+                    Debug.Assert(_currentNode.LineInfo != null, "Line nodes are always initialized.");
+                    _currentLineInfo = _currentNode.LineInfo;
                 }
                 else
                 {

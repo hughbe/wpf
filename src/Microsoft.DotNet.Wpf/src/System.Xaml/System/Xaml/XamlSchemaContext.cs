@@ -12,6 +12,7 @@ using System.Threading;
 using System.Xaml.MS.Impl;
 using System.Xaml.Schema;
 using MS.Internal.Xaml.Parser;
+using System.Diagnostics.CodeAnalysis;
 #if !TARGETTING35SP1
 using System.Collections.Concurrent;
 #endif
@@ -558,15 +559,7 @@ namespace System.Xaml
 
         public virtual XamlType GetXamlType(Type type)
         {
-            return GetXamlType(type, XamlLanguage.TypeAlias(type));
-        }
-
-        internal XamlType GetXamlType(Type type, string alias)
-        {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
+            string alias = XamlLanguage.TypeAlias(type);
             XamlType xamlType = null;
             if (!MasterTypeList.TryGetValue(type, out xamlType))
             {
@@ -1435,8 +1428,10 @@ namespace System.Xaml
             {
             }
 
+            [ExcludeFromCodeCoverage]
             int IList<T>.IndexOf(T item) => throw new NotSupportedException();
 
+            [ExcludeFromCodeCoverage]
             void IList<T>.Insert(int index, T item)
             {
                 Insert(index, new WeakReference(item));
@@ -1445,6 +1440,7 @@ namespace System.Xaml
             T IList<T>.this[int index]
             {
                 get => (T)this[index].Target;
+                [ExcludeFromCodeCoverage]
                 set => this[index] = new WeakReference(value);
             }
 
@@ -1462,6 +1458,7 @@ namespace System.Xaml
                 return false;
             }
 
+            [ExcludeFromCodeCoverage]
             void ICollection<T>.CopyTo(T[] array, int arrayIndex)
             {
                 for (int i = 0; i < Count; i++)
@@ -1470,20 +1467,25 @@ namespace System.Xaml
                 }
             }
 
+            [ExcludeFromCodeCoverage]
             bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
 
+            [ExcludeFromCodeCoverage]
             bool ICollection<T>.IsReadOnly => false;
 
+            [ExcludeFromCodeCoverage]
             IEnumerator<T> IEnumerable<T>.GetEnumerator()
             {
                 return Enumerate().GetEnumerator();
             }
 
+            [ExcludeFromCodeCoverage]
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return ((IEnumerable<T>)this).GetEnumerator();
             }
 
+            [ExcludeFromCodeCoverage]
             private IEnumerable<T> Enumerate()
             {
                 foreach (WeakReference weakRef in (IEnumerable<WeakReference>)this)
