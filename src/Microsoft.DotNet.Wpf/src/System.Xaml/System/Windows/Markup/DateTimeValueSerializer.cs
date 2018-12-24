@@ -10,8 +10,9 @@ using System.Xaml;
 namespace System.Windows.Markup
 {
     /// <summary>
-    /// This class converts DateTime values to/from string.  We don't use the DateTimeConverter
-    /// because it doesn't support custom cultures, and in Xaml we require the converter to
+    /// This class converts DateTime values to/from string.
+    /// We don't use the DateTimeConverter because it doesn't support
+    /// custom cultures, and in Xaml we require the converter to
     /// support en-us culture.
     /// </summary>
     [TypeForwardedFrom("WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
@@ -57,7 +58,7 @@ namespace System.Windows.Markup
             // Get a DateTimeFormatInfo and set the formatting style for round-tripping
             // and to trim the string.
             DateTimeFormatInfo dateTimeFormatInfo = (DateTimeFormatInfo)TypeConverterHelper.InvariantEnglishUS.GetFormat(typeof(DateTimeFormatInfo));
-            const DateTimeStyles DateTimeStyles = DateTimeStyles.RoundtripKind 
+            const DateTimeStyles DateTimeStyles = DateTimeStyles.RoundtripKind
                       | DateTimeStyles.NoCurrentDateDefault
                       | DateTimeStyles.AllowLeadingWhite
                       | DateTimeStyles.AllowTrailingWhite;
@@ -79,7 +80,7 @@ namespace System.Windows.Markup
             var formatString = new StringBuilder("yyyy-MM-dd");
             if (dateTime.TimeOfDay == TimeSpan.Zero)
             {
-                // The time portion of this DateTime is exactly at midnight.  
+                // The time portion of this DateTime is exactly at midnight.
                 // We don't include the time component if the Kind is unspecified.
                 // Otherwise, we're going to be including the time zone info, so'll
                 // we'll have to include the time.

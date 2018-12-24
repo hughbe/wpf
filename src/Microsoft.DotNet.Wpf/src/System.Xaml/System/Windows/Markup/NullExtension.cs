@@ -7,11 +7,11 @@ using System.Runtime.CompilerServices;
 namespace System.Windows.Markup
 {
     /// <summary>
-    ///  Class for Xaml markup extension for Null.  
+    /// Class for Xaml markup extension for Null.
     /// </summary>
     [TypeForwardedFrom("PresentationFramework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     [MarkupExtensionReturnType(typeof(object))]
-    public class NullExtension : MarkupExtension 
+    public class NullExtension : MarkupExtension
     {
         /// <summary>
         /// Default constructor
@@ -19,7 +19,7 @@ namespace System.Windows.Markup
         public NullExtension()
         {
         }
-        
+
         /// <summary>
         /// Return an object that should be set on the targetObject's targetProperty
         /// for this markup extension. In this case it is simply null.

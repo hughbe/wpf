@@ -48,27 +48,23 @@ namespace System.Windows.Markup
             Type = elements.GetType().GetElementType();
         }
 
-        ///<summary>
-        /// Called to Add an object as a new array item.  This will append the object to the end
-        /// of the array.
-        ///</summary>
-        ///<param name="value">
-        /// Object to add to the end of the array.
-        ///</param>
+        /// <summary>
+        /// Called to Add an object as a new array item. This will append the
+        /// object to the end of the array.
+        /// </summary>
+        /// <param name="value">Object to add to the end of the array.</param>
         public void AddChild(object value) => _arrayList.Add(value);
 
-        ///<summary>
-        /// Called to Add a text as a new array item.  This will append the object to the end
-        /// of the array.
-        ///</summary>
-        ///<param name="text">
-        /// Text to Add to the end of the array
-        ///</param> 
+        /// <summary>
+        /// Called to Add a text as a new array item. This will append the
+        /// object to the end of the array.
+        /// </summary>
+        /// <param name="text">Text to Add to the end of the array.</param> 
         public void AddText(string text) => AddChild(text);
 
         ///<summary>
         /// Get and set the type of array to be created when calling ProvideValue
-        ///</summary>
+        /// </summary>
         [ConstructorArgument("type")]
         public Type Type { get; set; }
 
@@ -79,12 +75,10 @@ namespace System.Windows.Markup
         public IList Items => _arrayList;
 
         /// <summary>
-        ///  Return an array that is sized to the number of objects added to the ArrayExtension.
+        /// Return an array that is sized to the number of objects added to the ArrayExtension.
         /// </summary>
         /// <param name="serviceProvider">Object that can provide services for the markup extension.</param>
-        /// <returns>
-        ///  The Array containing all the objects added to this extension.
-        /// </returns>
+        /// <returns>The Array containing all the objects added to this extension.</returns>
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             if (Type == null)

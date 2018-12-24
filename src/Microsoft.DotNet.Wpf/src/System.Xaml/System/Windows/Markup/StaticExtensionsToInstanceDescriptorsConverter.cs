@@ -12,7 +12,7 @@ namespace System.Windows.Markup
     /// <summary>
     /// Converter to convert StaticExtensions to InstanceDescriptors
     /// </summary>
-    internal class StaticExtensionConverter : TypeConverter
+    internal class StaticExtensionsToInstanceDescriptorsConverter : TypeConverter
     {
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
@@ -25,8 +25,8 @@ namespace System.Windows.Markup
         }
 
         ///<SecurityNote>
-        ///     Critical: calls InstanceDescriptor ctor which LinkDemands
-        ///     TreatAsSafe: can only make an InstanceDescriptor for StaticExtension, not an arbitrary class
+        /// Critical: calls InstanceDescriptor ctor which LinkDemands
+        /// TreatAsSafe: can only make an InstanceDescriptor for StaticExtension, not an arbitrary class
         ///</SecurityNote> 
         [SecurityCritical, SecurityTreatAsSafe]
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
