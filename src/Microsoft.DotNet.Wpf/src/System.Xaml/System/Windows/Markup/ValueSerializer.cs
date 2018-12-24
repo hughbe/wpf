@@ -140,7 +140,7 @@ namespace System.Windows.Markup
                     // Try to use the type converter
                     TypeConverter converter = TypeConverterHelper.GetTypeConverter(type);
 
-                    // DateTime is a special-case.  We can't use the DateTimeConverter, because it doesn't
+                    // DateTime is a special-case. We can't use the DateTimeConverter, because it doesn't
                     // support anything other than user culture and invariant culture, and we need to specify
                     // en-us culture.
                     if (converter.GetType() == typeof(DateTimeConverter2))

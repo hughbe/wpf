@@ -12,7 +12,7 @@ namespace System.Windows.Markup
     /// <summary>
     /// Converter to convert StaticExtensions to InstanceDescriptors
     /// </summary>
-    internal class StaticExtensionConverter : TypeConverter
+    internal class StaticExtensionsToInstanceDescriptorsConverter : TypeConverter
     {
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {

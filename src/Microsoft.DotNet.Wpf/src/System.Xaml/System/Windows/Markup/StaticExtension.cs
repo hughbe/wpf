@@ -12,9 +12,9 @@ namespace System.Windows.Markup
     /// Class for Xaml markup extension for static field and property references.
     /// </summary>
     [TypeForwardedFrom("PresentationFramework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
-    [TypeConverter(typeof(StaticExtensionConverter))]
+    [TypeConverter(typeof(StaticExtensionsToInstanceDescriptorsConverter))]
     [MarkupExtensionReturnType(typeof(object))]
-    public class StaticExtension : MarkupExtension 
+    public class StaticExtension : MarkupExtension
     {
         private string _member;
         private Type _memberType;
@@ -25,9 +25,9 @@ namespace System.Windows.Markup
         public StaticExtension()
         {
         }
-        
+
         /// <summary>
-        /// Constructor that takes the member that this is a static reference to.  
+        /// Constructor that takes the member that this is a static reference to.
         /// This string is of the format Prefix:ClassName.FieldOrPropertyName.
         /// The Prefix is optional, and refers to the XML prefix in a Xaml file.
         /// </summary>
@@ -37,14 +37,12 @@ namespace System.Windows.Markup
         }
 
         /// <summary>
-        ///  Return an object that should be set on the targetObject's targetProperty
-        ///  for this markup extension.  For a StaticExtension this is a static field
-        ///  or property value.
+        /// Return an object that should be set on the targetObject's targetProperty
+        /// for this markup extension. For a StaticExtension this is a static field
+        /// or property value.
         /// </summary>
         /// <param name="serviceProvider">Object that can provide services for the markup extension.</param>
-        /// <returns>
-        ///  The object to set on this property.
-        /// </returns>
+        /// <returns> The object to set on this property.</returns>
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             if (_member == null)
@@ -120,7 +118,7 @@ namespace System.Windows.Markup
 
         /// <summary>
         /// Return false if a public static field or property with the same
-        // name cannot be found.
+        /// name cannot be found.
         /// <summary>
         private bool GetFieldOrPropertyValue(Type type, string name, out object value)
         {
@@ -155,8 +153,8 @@ namespace System.Windows.Markup
         }
 
         /// <summary>
-        /// The static field or property represented by a string.  This string is
-        /// of the format Prefix:ClassName.FieldOrPropertyName.  The Prefix is 
+        /// The static field or property represented by a string. This string is
+        /// of the format Prefix:ClassName.FieldOrPropertyName. The Prefix is
         /// optional, and refers to the XML prefix in a Xaml file.
         /// </summary>
         [ConstructorArgument("member")]
