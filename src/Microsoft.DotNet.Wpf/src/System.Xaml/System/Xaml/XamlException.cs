@@ -11,6 +11,15 @@ namespace System.Xaml
     [Serializable]
     public class XamlException : Exception
     {
+        public XamlException()
+        {
+        }
+
+        public XamlException(string message)
+            : base(message)
+        {
+        }
+
         public XamlException(string message, Exception innerException, int lineNumber, int linePosition)
             : base(message, innerException)
         {
@@ -27,6 +36,12 @@ namespace System.Xaml
                 LineNumber = xex.LineNumber;
                 LinePosition = xex.LinePosition;
             }
+        }
+
+        protected XamlException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            LineNumber = info.GetInt32("Line");
+            LinePosition = info.GetInt32("Offset");
         }
 
         internal void SetLineInfo(int lineNumber, int linePosition)
@@ -54,24 +69,6 @@ namespace System.Xaml
         public int LineNumber { get; protected set; }
         public int LinePosition { get; protected set; }
 
-        // FxCop required this.
-        public XamlException() { }
-
-        public XamlException(string message)
-            :base(message) { }
-
-        // FxCop required this.
-        protected XamlException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-            LineNumber = info.GetInt32("Line");
-            LinePosition = info.GetInt32("Offset");
-        }
-
         /// <SecurityNote>
         /// Critical: calls Critical method Exception.GetObjectData
         /// </SecurityNote>
@@ -94,61 +91,76 @@ namespace System.Xaml
         }
     }
 
-    [Serializable]  // FxCop advised this be Serializable.
+    [Serializable]
     public class XamlParseException : XamlException
     {
         internal XamlParseException(MeScanner meScanner, string message)
-            : base(message, null, meScanner.LineNumber, meScanner.LinePosition) { }
+            : base(message, null, meScanner.LineNumber, meScanner.LinePosition)
+        {
+        }
 
         internal XamlParseException(XamlScanner xamlScanner, string message)
-            : base(message, null, xamlScanner.LineNumber, xamlScanner.LinePosition) { }
+            : base(message, null, xamlScanner.LineNumber, xamlScanner.LinePosition)
+        {
+        }
 
         internal XamlParseException(int lineNumber, int linePosition, string message)
-            : base(message, null, lineNumber, linePosition) { }
+            : base(message, null, lineNumber, linePosition)
+        {
+        }
         
-        // FxCop required these.
-        public XamlParseException() { }
+        public XamlParseException()
+        {
+        }
 
         public XamlParseException(string message)
-            :base(message) { }
+            :base(message)
+        {
+        }
 
         public XamlParseException(string message, Exception innerException)
-            : base(message, innerException) { }
+            : base(message, innerException)
+        {
+        }
 
         protected XamlParseException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-
-        // FxCop and [Serializable] required this.
-        //public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        //{
-        //    base.GetObjectData(info, context);
-        //}
+            : base(info, context)
+        {
+        }
     }
 
-    [Serializable]  // FxCop advised this be Serializable.
+    [Serializable]
     public class XamlObjectWriterException : XamlException
     {
-        // FxCop required this, default constructor.
-        public XamlObjectWriterException() { }
+        public XamlObjectWriterException()
+        {
+        }
 
         public XamlObjectWriterException(string message)
-            : base(message) { }
+            : base(message)
+        {
+        }
 
         public XamlObjectWriterException(string message, Exception innerException)
-            : base(message, innerException) { }
+            : base(message, innerException)
+        {
+        }
 
-        // FxCop required this.
         protected XamlObjectWriterException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+            : base(info, context)
+        {
+        }
     }
 
-    [Serializable]  // FxCop advised this be Serializable.
+    [Serializable]
     public class XamlDuplicateMemberException : XamlException
     {
         public XamlMember DuplicateMember { get; set; }
         public XamlType ParentType { get; set; }
         
-        public XamlDuplicateMemberException() { }
+        public XamlDuplicateMemberException()
+        {
+        }
 
         public XamlDuplicateMemberException(XamlMember member, XamlType type)
             : base(SR.Get(SRID.DuplicateMemberSet, (member != null) ? member.Name : null, (type != null) ? type.Name : null))
@@ -158,18 +170,18 @@ namespace System.Xaml
         }
 
         public XamlDuplicateMemberException(string message)
-            : base(message) { }
+            : base(message)
+        {
+        }
 
         public XamlDuplicateMemberException(string message, Exception innerException)
-            : base(message, innerException) { }
+            : base(message, innerException)
+        {
+        }
 
         protected XamlDuplicateMemberException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
             DuplicateMember = (XamlMember)info.GetValue("DuplicateMember", typeof(XamlMember));
             ParentType = (XamlType)info.GetValue("ParentType", typeof(XamlType));
         }
@@ -189,36 +201,42 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(info));
             }
+
             info.AddValue("DuplicateMember", DuplicateMember);
             info.AddValue("ParentType", ParentType);
             base.GetObjectData(info, context);
         }
     }
 
-    [Serializable]  // FxCop advised this be Serializable.
+    [Serializable]
     public class XamlInternalException : XamlException
     {
-        const string MessagePrefix = "Internal XAML system error: ";
+        private const string MessagePrefix = "Internal XAML system error: ";
 
-        // FxCop required this, default constructor.
         public XamlInternalException()
-            : base(MessagePrefix) { }
+            : base(MessagePrefix)
+        {
+        }
 
         public XamlInternalException(string message)
-            : base(MessagePrefix + message, null) { }
+            : base(MessagePrefix + message, null)
+        {
+        }
 
         public XamlInternalException(string message, Exception innerException)
-            : base(MessagePrefix + message, innerException) { }
+            : base(MessagePrefix + message, innerException)
+        {
+        }
 
-        // FxCop required this.
         protected XamlInternalException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+            : base(info, context)
+        {
+        }
     }
 
-    [Serializable]  // FxCop advised this be Serializable.
+    [Serializable]
     public class XamlSchemaException : XamlException
     {
-        // FxCop required this, default constructor.
         public XamlSchemaException() { }
 
         public XamlSchemaException(string message)

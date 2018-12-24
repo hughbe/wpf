@@ -97,7 +97,7 @@ namespace System.Xaml
         {
             try
             {
-                InterruptableTransform(_wrappedReader, _writer, true);
+                InterruptableTransform(_wrappedReader, _writer);
             }
             catch (Exception ex)
             {
@@ -222,16 +222,14 @@ namespace System.Xaml
             return _currentNode;
         }
 
-        private void InterruptableTransform(XamlReader reader, XamlWriter writer, bool closeWriter)
+        private void InterruptableTransform(XamlReader reader, XamlWriter writer)
         {
             IXamlLineInfo xamlLineInfo = reader as IXamlLineInfo;
             IXamlLineInfoConsumer xamlLineInfoConsumer = writer as IXamlLineInfoConsumer;
-            bool shouldPassLineNumberInfo = false;
-            if ((xamlLineInfo != null && xamlLineInfo.HasLineInfo)
-                && (xamlLineInfoConsumer != null && xamlLineInfoConsumer.ShouldProvideLineInfo))
-            {
-                shouldPassLineNumberInfo = true;
-            }
+            Debug.Assert(xamlLineInfo != null, "The constructor throws if the underlying reader is not IXamlLineInfo.");
+            Debug.Assert(xamlLineInfoConsumer != null, "WriteDelegate implements IXamlLineInfoConsumer.");
+
+            bool shouldPassLineNumberInfo = xamlLineInfo.HasLineInfo && xamlLineInfoConsumer.ShouldProvideLineInfo;
             while (reader.Read())
             {
                 if (IsDisposed)
@@ -248,10 +246,7 @@ namespace System.Xaml
                 writer.WriteNode(reader);
             }
 
-            if (closeWriter)
-            {
-                writer.Close();
-            }
+            writer.Close();
         }
 
         public override bool Read() => _internalReader.Read();

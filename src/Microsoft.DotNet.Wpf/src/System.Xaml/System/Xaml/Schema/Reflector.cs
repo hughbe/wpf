@@ -121,38 +121,27 @@ namespace System.Xaml.Schema
             }
         }
 
-        public IReadOnlyDictionary<char,char> GetBracketCharacterAttributes(Type attributeType)
+        public IReadOnlyDictionary<char,char> GetBracketCharacterAttributes()
         {
             if (CustomAttributeProvider != null)
             {
-                object[] attributes = CustomAttributeProvider.GetCustomAttributes(attributeType, false);
+                object[] attributes = CustomAttributeProvider.GetCustomAttributes(typeof(MarkupExtensionBracketCharactersAttribute), false);
                 if (attributes.Length == 0)
                 {
                     return null;
                 }
 
-                if (attributeType == typeof(MarkupExtensionBracketCharactersAttribute))
+                Dictionary<char, char> bracketCharacterAttributeList = new Dictionary<char, char>();
+                foreach (object attribute in attributes)
                 {
-                    Dictionary<char, char> bracketCharacterAttributeList = new Dictionary<char, char>();
-                    foreach (object attribute in attributes)
-                    {
-                        MarkupExtensionBracketCharactersAttribute bracketCharactersAttribute = (MarkupExtensionBracketCharactersAttribute)attribute;
-                        bracketCharacterAttributeList.Add(bracketCharactersAttribute.OpeningBracket, bracketCharactersAttribute.ClosingBracket);
-                    }
-
-                    return new ReadOnlyDictionary<char, char>(bracketCharacterAttributeList);
+                    MarkupExtensionBracketCharactersAttribute bracketCharactersAttribute = (MarkupExtensionBracketCharactersAttribute)attribute;
+                    bracketCharacterAttributeList.Add(bracketCharactersAttribute.OpeningBracket, bracketCharactersAttribute.ClosingBracket);
                 }
 
-                Debug.Fail("Unexpected attribute type requested: " + attributeType.Name);
-                return null;
+                return new ReadOnlyDictionary<char, char>(bracketCharacterAttributeList);
             }
 
-            if (attributeType == typeof(MarkupExtensionBracketCharactersAttribute))
-            {
-                return TokenizeBracketCharacters(attributeType);
-            }
-
-            return null;
+            return TokenizeBracketCharacters();
         }
 
         public T? GetAttributeValue<T>(Type attributeType) where T : struct
@@ -378,25 +367,20 @@ namespace System.Xaml.Schema
             }
         }
 
-        private ReadOnlyDictionary<char, char> TokenizeBracketCharacters(Type attributeType)
+        private ReadOnlyDictionary<char, char> TokenizeBracketCharacters()
         {
-            if (attributeType == typeof(MarkupExtensionBracketCharactersAttribute))
+            IList<CustomAttributeData> attrDataList = new List<CustomAttributeData>();
+            GetAttributes(typeof(MarkupExtensionBracketCharactersAttribute), attrDataList);
+
+            Dictionary<char, char> bracketCharacterList = new Dictionary<char, char>();
+            foreach (CustomAttributeData attributeData in attrDataList)
             {
-                IList<CustomAttributeData> attrDataList = new List<CustomAttributeData>();
-                GetAttributes(attributeType, attrDataList);
-
-                Dictionary<char, char> bracketCharacterList = new Dictionary<char, char>();
-                foreach (CustomAttributeData attributeData in attrDataList)
-                {
-                    char openingBracket = (char) (attributeData.ConstructorArguments[0].Value);
-                    char closingBracket = (char) (attributeData.ConstructorArguments[1].Value);
-                    bracketCharacterList.Add(openingBracket, closingBracket);
-                }
-
-                return new ReadOnlyDictionary<char, char>(bracketCharacterList);
+                char openingBracket = (char)(attributeData.ConstructorArguments[0].Value);
+                char closingBracket = (char)(attributeData.ConstructorArguments[1].Value);
+                bracketCharacterList.Add(openingBracket, closingBracket);
             }
 
-            return null;
+            return new ReadOnlyDictionary<char, char>(bracketCharacterList);
         }
 
         private Type ExtractType(CustomAttributeData cad)

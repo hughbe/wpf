@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
+using System.Diagnostics;
 using System.Windows.Markup;
 
 namespace System.Xaml
@@ -20,11 +21,7 @@ namespace System.Xaml
             {
                 return ReferenceEquals(t2, null);
             }
-
-            if (ReferenceEquals(t2, null))
-            {
-                return false;
-            }
+            Debug.Assert(t2 != null);
 
             if (t1.FullName != t2.FullName)
             {
@@ -119,10 +116,8 @@ namespace System.Xaml
 
         private static bool IsLooseSubClassOf(Type t1, Type t2)
         {
-            if (t1 == null || t2 == null)
-            {
-                return false;
-            }
+            Debug.Assert(t1 != null);
+            Debug.Assert(t2 != null);
 
             if (AssemblyQualifiedNameEquals(t1, t2))
             {

@@ -431,7 +431,6 @@ namespace System.Xaml.Schema
             out ICollection<EventInfo> newEvents, out List<XamlMember> knownMembers)
         {
             Debug.Assert(UnderlyingType != null, "Caller should check for UnderlyingType == null");
-            Debug.Assert(_nonAttachableMemberCache != null, "Members property should have been invoked before this");
 
             PropertyInfo[] propList = UnderlyingType.GetProperties(AllProperties_BF);
             EventInfo[] eventList = UnderlyingType.GetEvents(AllProperties_BF);
@@ -647,22 +646,6 @@ namespace System.Xaml.Schema
             }
         }
 
-        private MethodInfo PickAttachableEventAdder(IEnumerable<MethodInfo> adders)
-        {
-            if (adders != null)
-            {
-                // See disambiguation note in PickAttachablePropertyAccessors
-                foreach (MethodInfo adder in adders)
-                {
-                    if (!adder.IsPrivate)
-                    {
-                        return adder;
-                    }
-                }
-            }
-            return null;
-        }
-
         internal bool LookupAttachableProperty(string name, out MethodInfo getter, out MethodInfo setter)
         {
             Debug.Assert(UnderlyingType != null, "Caller should check for UnderlyingType == null");
@@ -688,7 +671,9 @@ namespace System.Xaml.Schema
             {
                 return null;
             }
-            return PickAttachableEventAdder(adders);
+
+            // Return the first event matching this name.
+            return adders[0];
         }
 
         private void LookupAllStaticAccessors(out Dictionary<string, List<MethodInfo>> getters, 
@@ -925,7 +910,6 @@ namespace System.Xaml.Schema
         internal IList<XamlMember> LookupAllAttachableMembers(XamlSchemaContext schemaContext)
         {
             Debug.Assert(UnderlyingType != null, "Caller should check for UnderlyingType == null");
-            Debug.Assert(_attachableMemberCache != null, "AttachableMembers property should have been invoked before this");
 
             List<XamlMember> result = new List<XamlMember>();
 
@@ -989,7 +973,7 @@ namespace System.Xaml.Schema
                 XamlMember member = null;
                 if (!_attachableMemberCache.TryGetValue(name, out member))
                 {
-                    MethodInfo adder = PickAttachableEventAdder(nameAndAdderList.Value);
+                    MethodInfo adder = nameAndAdderList.Value[0];
                     member = schemaContext.GetAttachableEvent(name, adder);
                 }
                 if (member != null)

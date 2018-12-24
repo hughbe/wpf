@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Xaml
 {
@@ -42,6 +43,7 @@ namespace System.Xaml
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private void InitializeProvideLineInfo()
         {
             //By default, _provideLineInfo is true if the currently executing process is running in debug mode

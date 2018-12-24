@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Xaml.Schema;
 
@@ -20,6 +21,7 @@ namespace MS.Internal.Xaml.Parser
             {
             }
 
+            [ExcludeFromCodeCoverage]
             protected TypeNameParserException(SerializationInfo si, StreamingContext sc) : base(si, sc)
             {
             }
@@ -293,26 +295,17 @@ namespace MS.Internal.Xaml.Parser
 
         private XamlTypeName CollectNameFromStack()
         {
-            if (_stack.Count != 1)
-            {
-                throw new TypeNameParserException(SR.Get(SRID.InvalidTypeString, _inputText));
-            }
+            Debug.Assert(_stack.Count == 1);
 
             TypeNameFrame frame = _stack.Peek();
-            if (frame.TypeArgs.Count != 1)
-            {
-                throw new TypeNameParserException(SR.Get(SRID.InvalidTypeString, _inputText));
-            }
+            Debug.Assert(frame.TypeArgs.Count == 1);
 
             return frame.TypeArgs[0];
         }
 
         private IList<XamlTypeName> CollectNameListFromStack()
         {
-            if (_stack.Count != 1)
-            {
-                throw new TypeNameParserException(SR.Get(SRID.InvalidTypeString, _inputText));
-            }
+            Debug.Assert(_stack.Count == 1);
 
             TypeNameFrame frame = _stack.Peek();
             return frame.TypeArgs;
