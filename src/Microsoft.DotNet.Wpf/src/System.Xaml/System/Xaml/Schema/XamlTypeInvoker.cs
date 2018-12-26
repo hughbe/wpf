@@ -20,12 +20,11 @@ namespace System.Xaml.Schema
     /// </SecurityNote>
     public class XamlTypeInvoker
     {
-        private static XamlTypeInvoker s_Unknown;
-        private static object[] s_emptyObjectArray = new object[0];
+        private static XamlTypeInvoker s_unknown;
+        private static readonly object[] s_emptyObjectArray = new object[0];
 
         private Dictionary<XamlType, MethodInfo> _addMethods;
-        internal MethodInfo EnumeratorMethod { get; set; }
-        private XamlType _xamlType;
+        private readonly XamlType _xamlType;
 
         /// <SecurityNote>
         /// Critical: Used in combination with GetUninitializedObject to ensure that the object
@@ -42,13 +41,6 @@ namespace System.Xaml.Schema
         [SecurityCritical]
         private ThreeValuedBool _isPublic;
 
-        // vvvvv---- Unused members.  Servicing policy is to retain these anyway.  -----vvvvv
-        /// <SecurityNote>
-        /// Critical: Used to determine whether we need to demand ReflectionPermission before instantiating this type
-        /// </SecurityNote>
-        [SecurityCritical]
-        private ThreeValuedBool _isInSystemXaml;
-        // ^^^^^----- End of unused members.  -----^^^^^
 
         protected XamlTypeInvoker()
         {
@@ -56,33 +48,22 @@ namespace System.Xaml.Schema
 
         public XamlTypeInvoker(XamlType type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-            _xamlType = type;
+            _xamlType = type ?? throw new ArgumentNullException(nameof(type));
         }
 
         public static XamlTypeInvoker UnknownInvoker
         {
-            get
-            {
-                if (s_Unknown == null)
-                {
-                    s_Unknown = new XamlTypeInvoker();
-                }
-                return s_Unknown;
-            }
+            get => s_unknown ?? (s_unknown = new XamlTypeInvoker());
         }
 
         public EventHandler<XamlSetMarkupExtensionEventArgs> SetMarkupExtensionHandler
         {
-            get { return _xamlType != null ? _xamlType.SetMarkupExtensionHandler : null; }
+            get => _xamlType?.SetMarkupExtensionHandler;
         }
 
         public EventHandler<XamlSetTypeConverterEventArgs> SetTypeConverterHandler
         {
-            get { return _xamlType != null ? _xamlType.SetTypeConverterHandler : null; }
+            get => _xamlType?.SetTypeConverterHandler;
         }
 
         public virtual void AddToCollection(object instance, object item)
@@ -91,6 +72,7 @@ namespace System.Xaml.Schema
             {
                 throw new ArgumentNullException(nameof(instance));
             }
+
             IList list = instance as IList;
             if (list != null)
             {
@@ -103,6 +85,7 @@ namespace System.Xaml.Schema
             {
                 throw new NotSupportedException(SR.Get(SRID.OnlySupportedOnCollections));
             }
+
             XamlType itemType;
             if (item != null)
             {
@@ -117,6 +100,7 @@ namespace System.Xaml.Schema
             {
                 throw new XamlSchemaException(SR.Get(SRID.NoAddMethodFound, _xamlType, itemType));
             }
+
             SafeReflectionInvoker.InvokeMethod(addMethod, instance, new object[] { item });
         }
 
@@ -126,6 +110,7 @@ namespace System.Xaml.Schema
             {
                 throw new ArgumentNullException(nameof(instance));
             }
+
             IDictionary dictionary = instance as IDictionary;
             if (dictionary != null)
             {
@@ -138,6 +123,7 @@ namespace System.Xaml.Schema
             {
                 throw new NotSupportedException(SR.Get(SRID.OnlySupportedOnDictionaries));
             }
+
             XamlType itemType;
             if (item != null)
             {
@@ -152,6 +138,7 @@ namespace System.Xaml.Schema
             {
                 throw new XamlSchemaException(SR.Get(SRID.NoAddMethodFound, _xamlType, itemType));
             }
+
             SafeReflectionInvoker.InvokeMethod(addMethod, instance, new object[] { key, item });
         }
 
@@ -166,7 +153,7 @@ namespace System.Xaml.Schema
                     return result;
                 }
             }
-            return CreateInstanceWithActivator(_xamlType.UnderlyingType, arguments);
+            return SafeReflectionInvoker.CreateInstance(_xamlType.UnderlyingType, arguments);
         }
 
         /// <SecurityNote>
@@ -202,12 +189,11 @@ namespace System.Xaml.Schema
             MethodInfo addMethod;
             if (_addMethods == null)
             {
-                Dictionary<XamlType, MethodInfo> addMethods = new Dictionary<XamlType, MethodInfo>();
+                var addMethods = new Dictionary<XamlType, MethodInfo>();
                 addMethods.Add(_xamlType.ItemType, _xamlType.AddMethod);
                 foreach (XamlType type in _xamlType.AllowedContentTypes)
                 {
-                    addMethod = CollectionReflector.GetAddMethod(
-                        _xamlType.UnderlyingType, type.UnderlyingType);
+                    addMethod = CollectionReflector.GetAddMethod(_xamlType.UnderlyingType, type.UnderlyingType);
                     if (addMethod != null)
                     {
                         addMethods.Add(type, addMethod);
@@ -216,13 +202,13 @@ namespace System.Xaml.Schema
                 _addMethods = addMethods;
             }
 
-            // First try the fast path.  Look for an exact match.
+            // First try the fast path. Look for an exact match.
             if (_addMethods.TryGetValue(contentType, out addMethod))
             {
                 return addMethod;
             }
 
-            // Next the slow path.  Check each one for is assignable from.
+            // Next the slow path. Check each one for is assignable from.
             foreach (KeyValuePair<XamlType, MethodInfo> pair in _addMethods)
             {
                 if (contentType.CanAssignTo(pair.Key))
@@ -250,6 +236,7 @@ namespace System.Xaml.Schema
             {
                 throw new ArgumentNullException(nameof(instance));
             }
+
             IEnumerable enumerable = instance as IEnumerable;
             if (enumerable != null)
             {
@@ -260,32 +247,10 @@ namespace System.Xaml.Schema
             {
                 throw new NotSupportedException(SR.Get(SRID.OnlySupportedOnCollectionsAndDictionaries));
             }
+
             MethodInfo getEnumMethod = GetEnumeratorMethod();
             return (IEnumerator)SafeReflectionInvoker.InvokeMethod(getEnumMethod, instance, s_emptyObjectArray);
         }
-
-        // vvvvv---- Unused members.  Servicing policy is to retain these anyway.  -----vvvvv
-        /// <SecurityNote>
-        /// Critical: Sets critical field _isInSystemXaml
-        /// Safe: Gets the result from SafeCritical SafeReflectionInvoker.IsInSystemXaml.
-        ///       Uses the type's UnderlyingSystemType, which is what's actually created by Activator.CreateInstance.
-        /// </SecurityNote>
-        private bool IsInSystemXaml
-        {
-            [SecuritySafeCritical]
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Retained per servicing policy.")]
-            get
-            {
-                if (_isInSystemXaml == ThreeValuedBool.NotSet)
-                {
-                    Type type = _xamlType.UnderlyingType.UnderlyingSystemType;
-                    bool result = SafeReflectionInvoker.IsInSystemXaml(type);
-                    _isInSystemXaml = result ? ThreeValuedBool.True : ThreeValuedBool.False;
-                }
-                return _isInSystemXaml == ThreeValuedBool.True;
-            }
-        }
-        // ^^^^^----- End of unused members.  -----^^^^^
 
         /// <SecurityNote>
         /// Critical: Sets critical field _isPublic
@@ -306,20 +271,7 @@ namespace System.Xaml.Schema
             }
         }
 
-        private bool IsUnknown
-        {
-            get { return _xamlType == null || _xamlType.UnderlyingType == null; }
-        }
-
-        /// <SecurityNote>
-        /// Critical: See explanation in SafeReflectionInvoker.
-        /// Safe: See explanation in SafeReflectionInvoker.
-        /// </SecurityNote>
-        [SecuritySafeCritical]
-        private object CreateInstanceWithActivator(Type type, object[] arguments)
-        {
-            return SafeReflectionInvoker.CreateInstance(type, arguments);
-        }
+        private bool IsUnknown => _xamlType?.UnderlyingType == null;
 
         private void ThrowIfUnknown()
         {
@@ -342,8 +294,8 @@ namespace System.Xaml.Schema
                 {
                     return null;
                 }
-                object inst = CallCtorDelegate(type);
-                return inst;
+                
+                return CallCtorDelegate(type);
             }
 
             /// <SecurityNote>
@@ -438,29 +390,6 @@ namespace System.Xaml.Schema
                     s_securityFailureWithCtorDelegate = ThreeValuedBool.True;
                     return false;
                 }
-            }
-        }
-
-        private class UnknownTypeInvoker : XamlTypeInvoker
-        {
-            public override void AddToCollection(object instance, object item)
-            {
-                throw new NotSupportedException(SR.Get(SRID.NotSupportedOnUnknownType));
-            }
-
-            public override void AddToDictionary(object instance, object key, object item)
-            {
-                throw new NotSupportedException(SR.Get(SRID.NotSupportedOnUnknownType));
-            }
-
-            public override object CreateInstance(object[] arguments)
-            {
-                throw new NotSupportedException(SR.Get(SRID.NotSupportedOnUnknownType));
-            }
-
-            public override IEnumerator GetItems(object instance)
-            {
-                throw new NotSupportedException(SR.Get(SRID.NotSupportedOnUnknownType));
             }
         }
     }
