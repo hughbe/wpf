@@ -8,7 +8,7 @@ using MS.Internal.Xaml.Parser;
 
 namespace System.Xaml
 {
-    [Serializable]  // FxCop advised this be Serializable.
+    [Serializable]
     public class XamlException : Exception
     {
         public XamlException(string message, Exception innerException, int lineNumber, int linePosition)

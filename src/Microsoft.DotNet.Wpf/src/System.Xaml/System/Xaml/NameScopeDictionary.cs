@@ -10,13 +10,14 @@ using System.Xaml.MS.Impl;
 
 namespace System.Xaml
 {
-    //
-    // The implementation for this class is taken directly from the source of NameScope, including the use
-    // of HybridDictionary to match the performance semantics of 3.0 for the time being 
-    // Note that the IEnumerable<T> uses KeyValuePair<string, object>
-    // This means that we need to create KeyValuePairs on the fly
-    // The other option would be to just use IEnumerable (or change the HybridDictionary to Dictionary<K,V>)
-    // but I opted for generic usability for now since this shouldn't be a common hot path.
+    /// <summary>
+    /// The implementation for this class is taken directly from the source of NameScope, including the use
+    /// of HybridDictionary to match the performance semantics of 3.0 for the time being 
+    /// Note that the IEnumerable<T> uses KeyValuePair<string, object>
+    /// This means that we need to create KeyValuePairs on the fly
+    /// The other option would be to just use IEnumerable (or change the HybridDictionary to Dictionary<K,V>)
+    /// but I opted for generic usability for now since this shouldn't be a common hot path.
+    /// </summary>
     internal class NameScopeDictionary : INameScopeDictionary
     {
         private HybridDictionary _nameMap;

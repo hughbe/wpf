@@ -6,10 +6,8 @@ namespace System.Xaml
 {
     public class XamlXmlWriterSettings : XamlWriterSettings
     {
-        public bool AssumeValidInput
-        { get; set; }
-        public bool CloseOutput
-        { get; set; }
+        public bool AssumeValidInput { get; set; }
+        public bool CloseOutput { get; set; }
 
         public XamlXmlWriterSettings Copy()
         {

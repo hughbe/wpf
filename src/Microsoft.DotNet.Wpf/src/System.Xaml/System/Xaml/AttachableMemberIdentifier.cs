@@ -6,30 +6,15 @@ namespace System.Xaml
 {
     public class AttachableMemberIdentifier : IEquatable<AttachableMemberIdentifier>
     {
-        readonly Type declaringType;
-        readonly string memberName;
-
         public AttachableMemberIdentifier(Type declaringType, string memberName)
         {
-            this.declaringType = declaringType;
-            this.memberName = memberName;
+            DeclaringType = declaringType;
+            MemberName = memberName;
         }
 
-        public string MemberName
-        {
-            get
-            {
-                return memberName;
-            }
-        }
+        public Type DeclaringType { get; }
 
-        public Type DeclaringType
-        {
-            get
-            {
-                return this.declaringType;
-            }
-        }
+        public string MemberName { get; }
 
         public static bool operator !=(AttachableMemberIdentifier left, AttachableMemberIdentifier right)
         {
@@ -42,6 +27,7 @@ namespace System.Xaml
             {
                 return ReferenceEquals(right, null);
             }
+    
             return left.Equals(right);
         }
 
@@ -57,24 +43,24 @@ namespace System.Xaml
                 return false;
             }
 
-            return this.declaringType == other.declaringType && this.memberName == other.memberName;
+            return DeclaringType == other.DeclaringType && MemberName == other.MemberName;
         }
 
         public override int GetHashCode()
         {
-            int a = this.declaringType == null ? 0 : this.declaringType.GetHashCode();
-            int b = this.memberName == null ? 0 : this.memberName.GetHashCode();
+            int a = DeclaringType == null ? 0 : DeclaringType.GetHashCode();
+            int b = MemberName == null ? 0 : MemberName.GetHashCode();
             return ((a << 5) + a) ^ b;
         }
 
         public override string ToString()
         {
-            if (this.declaringType == null)
+            if (DeclaringType == null)
             {
-                return this.memberName;
+                return MemberName;
             }
 
-            return this.declaringType.ToString() + "." + memberName;
+            return DeclaringType.ToString() + "." + MemberName;
         }
     }
 }

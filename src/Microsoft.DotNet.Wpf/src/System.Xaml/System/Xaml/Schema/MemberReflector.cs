@@ -127,56 +127,47 @@ namespace System.Xaml.Schema
 
         internal string ConstructorArgument
         {
-            get { return _constructorArgument.Value; }
-            set { _constructorArgument.Value = value; }
+            get => _constructorArgument.Value;
+            set => _constructorArgument.Value = value;
         }
 
-        internal bool ConstructorArgumentIsSet
-        {
-            get { return _constructorArgument.IsSet; }
-        }
+        internal bool ConstructorArgumentIsSet => _constructorArgument.IsSet;
 
-        internal IReadOnlyDictionary<char,char> MarkupExtensionBracketCharactersArgument { get; set; }
+        internal IReadOnlyDictionary<char, char> MarkupExtensionBracketCharactersArgument { get; set; }
 
         internal bool MarkupExtensionBracketCharactersArgumentIsSet { get; set; }
 
         internal object DefaultValue
         {
-            get { return _defaultValue.IsNotPresent ? null : _defaultValue.Value; }
-            set { _defaultValue.Value = value; }
+            get => _defaultValue.IsNotPresent ? null : _defaultValue.Value;
+            set => _defaultValue.Value = value;
         }
 
         internal bool DefaultValueIsNotPresent
         {
-            get { return _defaultValue.IsNotPresent; }
-            set { _defaultValue.IsNotPresent = value; }
+            get => _defaultValue.IsNotPresent;
+            set => _defaultValue.IsNotPresent = value;
         }
 
-        internal bool DefaultValueIsSet
-        {
-            get { return _defaultValue.IsSet; }
-        }
+        internal bool DefaultValueIsSet => _defaultValue.IsSet;
 
         internal XamlValueConverter<XamlDeferringLoader> DeferringLoader
         {
-            get { return _deferringLoader.Value; }
-            set { _deferringLoader.Value = value; }
+            get => _deferringLoader.Value;
+            set => _deferringLoader.Value = value;
         }
 
-        internal bool DeferringLoaderIsSet { get { return _deferringLoader.IsSet; } }
+        internal bool DeferringLoaderIsSet => _deferringLoader.IsSet;
 
         internal IList<XamlMember> DependsOn { get; set; }
 
         internal DesignerSerializationVisibility? SerializationVisibility
         {
-            get { return (_designerSerializationVisibility != VisibilityNone) ? _designerSerializationVisibility : (DesignerSerializationVisibility?)null; }
-            set { _designerSerializationVisibility = value.GetValueOrDefault(VisibilityNone); }
+            get => (_designerSerializationVisibility != VisibilityNone) ? _designerSerializationVisibility : (DesignerSerializationVisibility?)null;
+            set => _designerSerializationVisibility = value.GetValueOrDefault(VisibilityNone);
         }
 
-        internal bool DesignerSerializationVisibilityIsSet
-        {
-            get { return _designerSerializationVisibility != VisibilityInvalid; }
-        }
+        internal bool DesignerSerializationVisibilityIsSet => _designerSerializationVisibility != VisibilityInvalid;
 
         /// <SecurityNote>
         /// Critical: Accesses critical field _getter
@@ -185,9 +176,9 @@ namespace System.Xaml.Schema
         internal MethodInfo Getter
         {
             [SecuritySafeCritical]
-            get { return _getter.Value; }
+            get => _getter.Value;
             [SecuritySafeCritical]
-            set { _getter.SetIfNull(value); }
+            set => _getter.SetIfNull(value);
         }
 
         /// <SecurityNote>
@@ -197,13 +188,13 @@ namespace System.Xaml.Schema
         internal bool GetterIsSet
         {
             [SecuritySafeCritical]
-            get { return _getter.IsSet; }
+            get => _getter.IsSet;
         }
 
         internal XamlMemberInvoker Invoker { get; set; }
 
         // No need to check valid flag, this is set at creation
-        internal bool IsUnknown { get { return (_memberBits & (int)BoolMemberBits.Unknown) != 0; } }
+        internal bool IsUnknown => (_memberBits & (int)BoolMemberBits.Unknown) != 0;
 
         /// <SecurityNote>
         /// Critical: Accesses critical field _setter
@@ -212,9 +203,9 @@ namespace System.Xaml.Schema
         internal MethodInfo Setter
         {
             [SecuritySafeCritical]
-            get { return _setter.Value; }
+            get => _setter.Value;
             [SecuritySafeCritical]
-            set { _setter.SetIfNull(value); }
+            set => _setter.SetIfNull(value);
         }
 
         /// <SecurityNote>
@@ -224,7 +215,7 @@ namespace System.Xaml.Schema
         internal bool SetterIsSet
         {
             [SecuritySafeCritical]
-            get { return _setter.IsSet; }
+            get => _setter.IsSet;
         }
 
         internal XamlType Type { get; set; }
@@ -233,21 +224,21 @@ namespace System.Xaml.Schema
 
         internal XamlValueConverter<TypeConverter> TypeConverter
         {
-            get { return _typeConverter.Value; }
-            set { _typeConverter.Value = value; }
+            get => _typeConverter.Value;
+            set => _typeConverter.Value = value;
         }
 
-        internal bool TypeConverterIsSet { get { return _typeConverter.IsSet; } }
+        internal bool TypeConverterIsSet => _typeConverter.IsSet;
 
         internal MemberInfo UnderlyingMember { get; set; }
 
         internal XamlValueConverter<ValueSerializer> ValueSerializer
         {
-            get { return _valueSerializer.Value; }
-            set { _valueSerializer.Value = value; }
+            get => _valueSerializer.Value;
+            set => _valueSerializer.Value = value;
         }
 
-        internal bool ValueSerializerIsSet { get { return _valueSerializer.IsSet; } }
+        internal bool ValueSerializerIsSet => _valueSerializer.IsSet;
 
         internal bool? GetFlag(BoolMemberBits flag)
         {
@@ -327,11 +318,6 @@ namespace System.Xaml.Schema
             return true;
         }
 
-
-        // Used by Reflector for attribute lookups
-        protected override MemberInfo Member
-        {
-            get { return UnderlyingMember; }
-        }
+        protected override MemberInfo Member => UnderlyingMember;
     }
 }

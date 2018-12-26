@@ -14,7 +14,7 @@ using System.Xaml.Schema;
 
 namespace System.Xaml.MS.Impl
 {
-    class XmlNsInfo
+    internal class XmlNsInfo
     {
         // Thread-safety: any lazily initalized fields in this class must be assigned idempotently.
         // I.e. never assign until the result is complete; and if multiple threads are assigning
@@ -22,85 +22,43 @@ namespace System.Xaml.MS.Impl
 
         // This property will always be non-null, unless the assembly is a collectible dynamic
         // assembly, and gets unloaded.
-        internal Assembly Assembly { get { return (Assembly)_assembly.Target; } }
+        internal Assembly Assembly => (Assembly)_assembly.Target;
 
         private IList<XmlNsDefinition> _nsDefs;
         internal IList<XmlNsDefinition> NsDefs
         {
-            get
-            {
-                if (_nsDefs == null)
-                {
-                    _nsDefs = LoadNsDefs();
-                }
-                return _nsDefs;
-            }
+            get => _nsDefs ?? (_nsDefs = LoadNsDefs());
         }
 
         // Note this, is the only dictionary that we synchronize, because XamlSchemaContext adds to it
         private ConcurrentDictionary<string, IList<string>> _clrToXmlNs = null;
         internal ConcurrentDictionary<string, IList<string>> ClrToXmlNs
         {
-            get
-            {
-                if (_clrToXmlNs == null)
-                {
-                    _clrToXmlNs = LoadClrToXmlNs();
-                }
-                return _clrToXmlNs;
-            }
+            get => _clrToXmlNs ?? (_clrToXmlNs = LoadClrToXmlNs());
         }
 
         private ICollection<AssemblyName> _internalsVisibleTo;
         internal ICollection<AssemblyName> InternalsVisibleTo
         {
-            get
-            {
-                if (_internalsVisibleTo == null)
-                {
-                    _internalsVisibleTo = LoadInternalsVisibleTo();
-                }
-                return _internalsVisibleTo;
-            }
+            get => _internalsVisibleTo ?? (_internalsVisibleTo = LoadInternalsVisibleTo());
         }
 
         private Dictionary<string, string> _oldToNewNs = null;
         internal Dictionary<string, string> OldToNewNs
         {
-            get
-            {
-                if (_oldToNewNs == null)
-                {
-                    _oldToNewNs = LoadOldToNewNs();
-                }
-                return _oldToNewNs;
-            }
+            get => _oldToNewNs ?? (_oldToNewNs = LoadOldToNewNs());
         }
 
         private Dictionary<string, string> _prefixes = null;
         internal Dictionary<string, string> Prefixes
         {
-            get
-            {
-                if (_prefixes == null)
-                {
-                    _prefixes = LoadPrefixes();
-                }
-                return _prefixes;
-            }
+            get => _prefixes ?? (_prefixes = LoadPrefixes());
         }
 
         private string _rootNamespace = null;
         internal string RootNamespace
         {
-            get
-            {
-                if (_rootNamespace == null)
-                {
-                    _rootNamespace = LoadRootNamespace() ?? string.Empty;
-                }
-                return _rootNamespace;
-            }
+            get => _rootNamespace ?? (_rootNamespace = LoadRootNamespace() ?? string.Empty);
         }
 
         private WeakReference _assembly;
@@ -113,7 +71,7 @@ namespace System.Xaml.MS.Impl
             _fullyQualifyAssemblyName = fullyQualifyAssemblyName;
         }
 
-        void EnsureReflectionOnlyAttributeData()
+        private void EnsureReflectionOnlyAttributeData()
         {
             if (_attributeData == null)
             {
@@ -142,7 +100,7 @@ namespace System.Xaml.MS.Impl
             return prefix2;
         }
 
-        IList<XmlNsDefinition> LoadNsDefs()
+        private IList<XmlNsDefinition> LoadNsDefs()
         {
             IList<XmlNsDefinition> result = new List<XmlNsDefinition>();
 
@@ -151,6 +109,7 @@ namespace System.Xaml.MS.Impl
             {
                 return result;
             }
+
             if (assembly.ReflectionOnly)
             {
                 EnsureReflectionOnlyAttributeData();
@@ -167,8 +126,7 @@ namespace System.Xaml.MS.Impl
             }
             else
             {
-                Attribute[] attributes;
-                attributes = Attribute.GetCustomAttributes(assembly, typeof(XmlnsDefinitionAttribute));
+                Attribute[] attributes = Attribute.GetCustomAttributes(assembly, typeof(XmlnsDefinitionAttribute));
                 foreach (Attribute attr in attributes)
                 {
                     XmlnsDefinitionAttribute xmlnsDefAttr = (XmlnsDefinitionAttribute)attr;
@@ -181,7 +139,7 @@ namespace System.Xaml.MS.Impl
             return result;
         }
 
-        void LoadNsDefHelper(IList<XmlNsDefinition> result, string xmlns, string clrns, Assembly assembly)
+        private void LoadNsDefHelper(IList<XmlNsDefinition> result, string xmlns, string clrns, Assembly assembly)
         {
             if (String.IsNullOrEmpty(xmlns) || clrns == null)
             {
@@ -191,7 +149,7 @@ namespace System.Xaml.MS.Impl
             result.Add(new XmlNsDefinition { ClrNamespace = clrns, XmlNamespace = xmlns });
         }
 
-        ConcurrentDictionary<string, IList<string>> LoadClrToXmlNs()
+        private ConcurrentDictionary<string, IList<string>> LoadClrToXmlNs()
         {
             ConcurrentDictionary<string, IList<string>> result =
                 XamlSchemaContext.CreateDictionary<string, IList<string>>();
@@ -229,7 +187,7 @@ namespace System.Xaml.MS.Impl
             return result;
         }
 
-        ICollection<AssemblyName> LoadInternalsVisibleTo()
+        private ICollection<AssemblyName> LoadInternalsVisibleTo()
         {
             var result = new List<AssemblyName>();
 
@@ -262,7 +220,7 @@ namespace System.Xaml.MS.Impl
             return result;
         }
 
-        void LoadInternalsVisibleToHelper(List<AssemblyName> result, string assemblyName, Assembly assembly)
+        private void LoadInternalsVisibleToHelper(List<AssemblyName> result, string assemblyName, Assembly assembly)
         {
             if (assemblyName == null)
             {
@@ -283,7 +241,7 @@ namespace System.Xaml.MS.Impl
             }
         }
 
-        Dictionary<string, string> LoadOldToNewNs()
+        private Dictionary<string, string> LoadOldToNewNs()
         {
             Dictionary<string, string> result = new Dictionary<string, string>(StringComparer.Ordinal);
 
@@ -320,7 +278,7 @@ namespace System.Xaml.MS.Impl
             return result;
         }
 
-        void LoadOldToNewNsHelper(Dictionary<string, string> result, string oldns, string newns, Assembly assembly)
+        private void LoadOldToNewNsHelper(Dictionary<string, string> result, string oldns, string newns, Assembly assembly)
         {
             if (String.IsNullOrEmpty(newns) || String.IsNullOrEmpty(oldns))
             {
@@ -334,7 +292,7 @@ namespace System.Xaml.MS.Impl
             result.Add(oldns, newns);
         }
 
-        Dictionary<string, string> LoadPrefixes()
+        private Dictionary<string, string> LoadPrefixes()
         {
             Dictionary<string, string> result = new Dictionary<string, string>(StringComparer.Ordinal);
 
@@ -343,6 +301,7 @@ namespace System.Xaml.MS.Impl
             {
                 return result;
             }
+
             if (assembly.ReflectionOnly)
             {
                 EnsureReflectionOnlyAttributeData();
@@ -369,9 +328,9 @@ namespace System.Xaml.MS.Impl
             return result;
         }
 
-        void LoadPrefixesHelper(Dictionary<string, string> result, string xmlns, string prefix, Assembly assembly)
+        private void LoadPrefixesHelper(Dictionary<string, string> result, string xmlns, string prefix, Assembly assembly)
         {
-            if (String.IsNullOrEmpty(prefix) || String.IsNullOrEmpty(xmlns))
+            if (string.IsNullOrEmpty(prefix) || string.IsNullOrEmpty(xmlns))
             {
                 throw new XamlSchemaException(SR.Get(SRID.BadXmlnsPrefix, assembly.FullName));
             }
@@ -384,7 +343,7 @@ namespace System.Xaml.MS.Impl
             }
         }
 
-        string LoadRootNamespace()
+        private string LoadRootNamespace()
         {
             Assembly assembly = Assembly;
             if (assembly == null)
@@ -412,7 +371,7 @@ namespace System.Xaml.MS.Impl
             }
         }
 
-        void MakeListsImmutable(IDictionary<string, IList<string>> dict)
+        private void MakeListsImmutable(IDictionary<string, IList<string>> dict)
         {
             // Need to copy the keys because we can't change a dictionary while iterating
             string[] keys = new string[dict.Count];
@@ -426,8 +385,8 @@ namespace System.Xaml.MS.Impl
 
         private class NamespaceComparer
         {
-            XmlNsInfo _nsInfo;
-            IDictionary<string, int> _subsumeCount;
+            private XmlNsInfo _nsInfo;
+            private IDictionary<string, int> _subsumeCount;
 
             public NamespaceComparer(XmlNsInfo nsInfo, Assembly assembly)
             {
@@ -465,6 +424,7 @@ namespace System.Xaml.MS.Impl
                 {
                     return 0;
                 }
+
                 const int Prefer_NS1 = -1;
                 const int Prefer_NS2 = 1;
 

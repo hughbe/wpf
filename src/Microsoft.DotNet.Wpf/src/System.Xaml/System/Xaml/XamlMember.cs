@@ -84,6 +84,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(schemaContext));
             }
+
             _name = propertyInfo.Name;
             _declaringType = schemaContext.GetXamlType(propertyInfo.DeclaringType);
             _memberType = MemberType.Instance;
@@ -94,12 +95,12 @@ namespace System.Xaml
 
         // Known event
         public XamlMember(EventInfo eventInfo, XamlSchemaContext schemaContext)
-            :this(eventInfo, schemaContext, null)
+            : this(eventInfo, schemaContext, null)
         {
         }
 
         public XamlMember(EventInfo eventInfo, XamlSchemaContext schemaContext, XamlMemberInvoker invoker)
-            :this(eventInfo, schemaContext, invoker, new MemberReflector(true /*isEvent*/))
+            : this(eventInfo, schemaContext, invoker, new MemberReflector(true /*isEvent*/))
         {
         }
 
@@ -118,6 +119,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(schemaContext));
             }
+
             _name = eventInfo.Name;
             _declaringType = schemaContext.GetXamlType(eventInfo.DeclaringType);
             _memberType = MemberType.Instance;
@@ -129,13 +131,13 @@ namespace System.Xaml
         // Known attachable property
         public XamlMember(string attachablePropertyName, MethodInfo getter, MethodInfo setter,
             XamlSchemaContext schemaContext)
-            :this(attachablePropertyName, getter, setter, schemaContext, null)
+            : this(attachablePropertyName, getter, setter, schemaContext, null)
         {
         }
 
         public XamlMember(string attachablePropertyName, MethodInfo getter, MethodInfo setter,
             XamlSchemaContext schemaContext, XamlMemberInvoker invoker)
-            :this(attachablePropertyName, getter, setter, schemaContext, invoker, new MemberReflector(getter, setter, false /*isEvent*/))
+            : this(attachablePropertyName, getter, setter, schemaContext, invoker, new MemberReflector(getter, setter, false /*isEvent*/))
         {
         }
 
@@ -160,8 +162,9 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(SR.Get(SRID.GetterOrSetterRequired), (Exception)null);
             }
-            ValidateGetter(getter, "getter");
-            ValidateSetter(setter, "setter");
+
+            ValidateGetter(getter, nameof(getter));
+            ValidateSetter(setter, nameof(setter));
 
             _name = attachablePropertyName;
             _declaringType = schemaContext.GetXamlType(accessor.DeclaringType);
@@ -173,7 +176,7 @@ namespace System.Xaml
 
         // Known attachable event
         public XamlMember(string attachableEventName, MethodInfo adder, XamlSchemaContext schemaContext)
-            :this(attachableEventName, adder, schemaContext, null)
+            : this(attachableEventName, adder, schemaContext, null)
         {
         }
 
@@ -203,7 +206,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(schemaContext));
             }
-            ValidateSetter(adder, "adder");
+            ValidateSetter(adder, nameof(adder));
 
             _name = attachableEventName;
             _declaringType = schemaContext.GetXamlType(adder.DeclaringType);
@@ -222,7 +225,7 @@ namespace System.Xaml
             _memberType = MemberType.Directive;
         }
 
-        public XamlType DeclaringType { get { return _declaringType; } }
+        public XamlType DeclaringType => _declaringType;
 
         public XamlMemberInvoker Invoker
         {
@@ -248,15 +251,15 @@ namespace System.Xaml
 
         public bool IsReadPublic
         {
-            get { return IsReadPublicIgnoringType && (_declaringType == null || _declaringType.IsPublic); }
+            get => IsReadPublicIgnoringType && (_declaringType == null || _declaringType.IsPublic);
         }
 
         public bool IsWritePublic
         {
-            get { return IsWritePublicIgnoringType && (_declaringType == null || _declaringType.IsPublic); }
+            get => IsWritePublicIgnoringType && (_declaringType == null || _declaringType.IsPublic);
         }
 
-        public string Name { get { return _name; } }
+        public string Name => _name;
 
         public bool IsNameValid
         {
@@ -381,35 +384,20 @@ namespace System.Xaml
         internal NullableReference<MemberInfo> UnderlyingMemberInternal
         {
             [SecuritySafeCritical]
-            get { return _underlyingMember; }
+            get => _underlyingMember;
         }
 
-        public bool IsReadOnly
-        {
-            get { return GetFlag(BoolMemberBits.ReadOnly); }
-        }
+        public bool IsReadOnly => GetFlag(BoolMemberBits.ReadOnly);
 
-        public bool IsWriteOnly
-        {
-            get { return GetFlag(BoolMemberBits.WriteOnly); }
-        }
+        public bool IsWriteOnly => GetFlag(BoolMemberBits.WriteOnly);
 
-        public bool IsAttachable
-        {
-            get { return _memberType == MemberType.Attachable; }
-        }
+        public bool IsAttachable => _memberType == MemberType.Attachable;
 
-        public bool IsEvent
-        {
-            get { return GetFlag(BoolMemberBits.Event); }
-        }
+        public bool IsEvent => GetFlag(BoolMemberBits.Event);
 
-        public bool IsDirective { get { return _memberType == MemberType.Directive; } }
+        public bool IsDirective => _memberType == MemberType.Directive;
 
-        public virtual IList<string> GetXamlNamespaces()
-        {
-            return DeclaringType.GetXamlNamespaces();
-        }
+        public virtual IList<string> GetXamlNamespaces() => DeclaringType.GetXamlNamespaces();
 
         public override string ToString()
         {
@@ -430,10 +418,7 @@ namespace System.Xaml
             }
         }
 
-        public bool IsAmbient
-        {
-            get { return GetFlag(BoolMemberBits.Ambient); }
-        }
+        public bool IsAmbient => GetFlag(BoolMemberBits.Ambient);
 
         public DesignerSerializationVisibility SerializationVisibility
         {
@@ -750,7 +735,7 @@ namespace System.Xaml
             }
             if (result == null && this.Type != null)
             {
-                result = this.Type.TypeConverter;
+                result = Type.TypeConverter;
             }
 
             return result;
@@ -769,7 +754,7 @@ namespace System.Xaml
             }
             if (result == null && this.Type != null)
             {
-                result = this.Type.ValueSerializer;
+                result = Type.ValueSerializer;
             }
             return result;
         }
@@ -920,7 +905,7 @@ namespace System.Xaml
             }
         }
 
-        private XamlSchemaContext SchemaContext { get { return _declaringType.SchemaContext; } }
+        private XamlSchemaContext SchemaContext => _declaringType.SchemaContext;
 
         private static bool GetDefaultFlag(BoolMemberBits flagBit)
         {

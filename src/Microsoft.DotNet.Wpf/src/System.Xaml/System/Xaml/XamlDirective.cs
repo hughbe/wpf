@@ -36,7 +36,7 @@ namespace System.Xaml
         }
 
         public XamlDirective(string xamlNamespace, string name)
-            :base(name, null)
+            : base(name, null)
         {
             _xamlNamespaces = GetReadOnly(xamlNamespace);
             _allowedLocation = AllowedMemberLocations.Any;
@@ -66,10 +66,7 @@ namespace System.Xaml
             }
         }
 
-        public override IList<string> GetXamlNamespaces()
-        {
-            return _xamlNamespaces;
-        }
+        public override IList<string> GetXamlNamespaces() => _xamlNamespaces;
 
         // We use the private field _xamlNamespaces to avoid expensive lookups or mutable
         // return values from overriden implementations of GetXamlNamespaces. But this will produce
@@ -114,45 +111,21 @@ namespace System.Xaml
             return null;
         }
 
-        protected sealed override bool LookupIsAmbient()
-        {
-            return false;
-        }
+        protected sealed override bool LookupIsAmbient() => false;
 
-        protected sealed override bool LookupIsEvent()
-        {
-            return false;
-        }
+        protected sealed override bool LookupIsEvent() => false;
 
-        protected sealed override bool LookupIsReadOnly()
-        {
-            return false;
-        }
+        protected sealed override bool LookupIsReadOnly() => false;
 
-        protected sealed override bool LookupIsReadPublic()
-        {
-            return true;
-        }
+        protected sealed override bool LookupIsReadPublic() => true;
 
-        protected sealed override bool LookupIsUnknown()
-        {
-            return base.IsUnknown;
-        }
+        protected sealed override bool LookupIsUnknown() => base.IsUnknown;
 
-        protected sealed override bool LookupIsWriteOnly()
-        {
-            return false;
-        }
+        protected sealed override bool LookupIsWriteOnly() => false;
 
-        protected sealed override bool LookupIsWritePublic()
-        {
-            return true;
-        }
+        protected sealed override bool LookupIsWritePublic() => true;
 
-        protected sealed override XamlType LookupTargetType()
-        {
-            return null;
-        }
+        protected sealed override XamlType LookupTargetType() => null;
 
         protected sealed override XamlValueConverter<TypeConverter> LookupTypeConverter()
         {
@@ -166,20 +139,11 @@ namespace System.Xaml
             return base.Type;
         }
 
-        protected sealed override MethodInfo LookupUnderlyingGetter()
-        {
-            return null;
-        }
+        protected sealed override MethodInfo LookupUnderlyingGetter() => null;
 
-        protected sealed override MemberInfo LookupUnderlyingMember()
-        {
-            return null;
-        }
+        protected sealed override MemberInfo LookupUnderlyingMember() => null;
 
-        protected sealed override MethodInfo LookupUnderlyingSetter()
-        {
-            return null;
-        }
+        protected sealed override MethodInfo LookupUnderlyingSetter() => null;
 
         private static ReadOnlyCollection<string> GetReadOnly(string xamlNamespace)
         {
@@ -187,6 +151,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(xamlNamespace));
             }
+
             return new ReadOnlyCollection<string>(new string[] { xamlNamespace });
         }
 
@@ -196,14 +161,16 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(xamlNamespaces));
             }
-            List<string> nsList = new List<string>(xamlNamespaces);
+
+            var nsList = new List<string>(xamlNamespaces);
             foreach (string ns in nsList)
             {
                 if (ns == null)
                 {
-                    throw new ArgumentException(SR.Get(SRID.CollectionCannotContainNulls, "xamlNamespaces"));
+                    throw new ArgumentException(SR.Get(SRID.CollectionCannotContainNulls, nameof(xamlNamespaces)), nameof(xamlNamespaces));
                 }
             }
+
             return nsList.AsReadOnly();
         }
     }
