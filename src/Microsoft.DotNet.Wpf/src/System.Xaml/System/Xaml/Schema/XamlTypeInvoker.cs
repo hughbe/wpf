@@ -196,7 +196,9 @@ namespace System.Xaml.Schema
                     addMethod = CollectionReflector.GetAddMethod(_xamlType.UnderlyingType, type.UnderlyingType);
                     if (addMethod != null)
                     {
-                        addMethods.Add(type, addMethod);
+                        // Use TryAdd as AllowedContentTypes can contain
+                        // duplicate types.
+                        addMethods.TryAdd(type, addMethod);
                     }
                 }
                 _addMethods = addMethods;
