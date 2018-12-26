@@ -1744,8 +1744,11 @@ namespace System.Xaml
         {
             if (IsUnknown)
             {
-                Debug.Assert(_namespaces != null && _namespaces.Count > 0);
-                int result = _name.GetHashCode() ^ _namespaces[0].GetHashCode();
+                int result = _name.GetHashCode();
+                if (_namespaces != null && _namespaces.Count > 0)
+                {
+                    result ^= _namespaces[0].GetHashCode();
+                }
                 if (_typeArguments != null && _typeArguments.Count > 0)
                 {
                     foreach (XamlType typeArgument in _typeArguments)
@@ -1784,10 +1787,19 @@ namespace System.Xaml
             {
                 if (xamlType2.IsUnknown)
                 {
-                    Debug.Assert(xamlType1._namespaces != null && xamlType1._namespaces.Count > 0);
-                    Debug.Assert(xamlType2._namespaces != null && xamlType2._namespaces.Count > 0);
+                    if (xamlType1._namespaces != null)
+                    {
+                        if (xamlType2._namespaces == null || xamlType1._namespaces[0] != xamlType2._namespaces[0])
+                        {
+                            return false;
+                        }
+                    }
+                    else if (xamlType2._namespaces != null)
+                    {
+                        return false;
+                    }
+
                     return (xamlType1._name == xamlType2._name) &&
-                        (xamlType1._namespaces[0] == xamlType2._namespaces[0]) &&
                         TypeArgumentsAreEqual(xamlType1, xamlType2);
                 }
                 return false;
@@ -1809,7 +1821,8 @@ namespace System.Xaml
 
         private static bool TypeArgumentsAreEqual(XamlType xamlType1, XamlType xamlType2)
         {
-            Debug.Assert(xamlType1.IsUnknown && xamlType2.IsUnknown);
+            Debug.Assert(xamlType1.IsUnknown);
+            Debug.Assert(xamlType2.IsUnknown);
             if (!xamlType1.IsGeneric)
             {
                 return !xamlType2.IsGeneric;
