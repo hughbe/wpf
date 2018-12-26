@@ -229,6 +229,11 @@ namespace System.Xaml.Schema
         /// </SecurityNote>
         public virtual MethodInfo GetEnumeratorMethod()
         {
+            if (IsUnknown)
+            {
+                return null;
+            }
+
             return _xamlType.GetEnumeratorMethod;
         }
 
