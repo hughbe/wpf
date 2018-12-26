@@ -19,30 +19,19 @@ namespace System.Xaml
 
         public virtual void Skip()
         {
-            switch(NodeType)
+            switch (NodeType)
             {
-            case XamlNodeType.NamespaceDeclaration:
-            case XamlNodeType.Value:
-            case XamlNodeType.EndObject:
-            case XamlNodeType.EndMember:
-            case XamlNodeType.None:
-                break;
-
             case XamlNodeType.StartObject:
                 SkipFromTo(XamlNodeType.StartObject, XamlNodeType.EndObject);
                 break;
-
             case XamlNodeType.StartMember:
                 SkipFromTo(XamlNodeType.StartMember, XamlNodeType.EndMember);
                 break;
             }
+
             Read();
         }
 
-        #region IDisposable
-
-        // See Framework Design Guidelines, pp. 248-260.
-        
         void IDisposable.Dispose()
         {
             Dispose(true);
@@ -53,27 +42,17 @@ namespace System.Xaml
 
         protected virtual void Dispose(bool disposing)
         {
-            IsDisposed = true;  // must call the base class to get IsDisposed == true;
+            IsDisposed = true;
         }
 
-        public void Close()
-        {
-            ((IDisposable)this).Dispose();
-        }
+        public void Close() => ((IDisposable)this).Dispose();
 
-        #endregion
-
-        public virtual XamlReader ReadSubtree()
-        {
-            return new XamlSubreader(this);
-        }
-
-        // ------ Private methods -------
+        public virtual XamlReader ReadSubtree() => new XamlSubreader(this);
 
         private void SkipFromTo(XamlNodeType startNodeType, XamlNodeType endNodeType)
         {
 #if DEBUG
-            if(NodeType != startNodeType)
+            if (NodeType != startNodeType)
             {
                 throw new XamlInternalException("SkipFromTo() called incorrectly");
             }

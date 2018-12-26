@@ -270,11 +270,7 @@ namespace System.Xaml.Schema
             }
             if (typeof(Delegate).IsAssignableFrom(targetType))
             {
-                if (ReferenceEquals(s_Delegate, null))
-                {
-                    s_Delegate = new BuiltInValueConverter<TypeConverter>(typeof(EventConverter), () => new EventConverter());
-                }
-                return s_Delegate;
+                return Event;
             }
             if (typeof(Uri).IsAssignableFrom(targetType))
             {

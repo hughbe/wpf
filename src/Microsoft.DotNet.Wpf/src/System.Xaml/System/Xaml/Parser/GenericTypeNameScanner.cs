@@ -137,11 +137,13 @@ namespace MS.Internal.Xaml.Parser
                 pos++;
             }
             while (pos < subscript.Length);
-            //unterminated string
-            return 0; 
+            // Unterminated string.
+            return 0;
         }
 
-        // strips the subscript off the end of typeName, and returns it
+        /// <summary>
+        /// Strips and returns the subscript off the end of typeName.
+        /// <summary>
         internal static string StripSubscript(string typeName, out string subscript)
         {
             int openBracketNdx = typeName.IndexOf(OpenBracket);
@@ -331,15 +333,9 @@ namespace MS.Internal.Xaml.Parser
             _idx = 0;
         }
 
-        protected char CurrentChar
-        {
-            get { return _inputText[_idx]; }
-        }
+        protected char CurrentChar => _inputText[_idx];
 
-        public bool IsAtEndOfInput
-        {
-            get { return (_idx >= _inputText.Length); }
-        }
+        public bool IsAtEndOfInput => _idx >= _inputText.Length;
 
         protected bool Advance()
         {

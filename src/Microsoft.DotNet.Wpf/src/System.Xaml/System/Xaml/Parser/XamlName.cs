@@ -32,13 +32,10 @@ namespace MS.Internal.Xaml.Parser
         protected string _prefix;
         protected string _namespace = null;
 
-        public string Prefix { get { return _prefix; } }
-        public string Namespace { get { return _namespace; } }
+        public string Prefix => _prefix;
+        public string Namespace => _namespace;
 
-        public static bool ContainsDot(string name)
-        {
-            return name.Contains(".");
-        }
+        public static bool ContainsDot(string name) => name.Contains(".");
 
         public static bool IsValidXamlName(string name)
         {
@@ -75,7 +72,7 @@ namespace MS.Internal.Xaml.Parser
                 return true;
             }
 
-            var unicodeCategory = char.GetUnicodeCategory(ch);
+            UnicodeCategory unicodeCategory = char.GetUnicodeCategory(ch);
             if (unicodeCategory == UnicodeCategory.NonSpacingMark || unicodeCategory == UnicodeCategory.SpacingCombiningMark)
             {
                 return true;

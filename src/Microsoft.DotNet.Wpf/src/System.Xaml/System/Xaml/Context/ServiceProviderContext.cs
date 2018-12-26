@@ -5,13 +5,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Markup;
 using System.Xaml;
+using System.Windows.Markup;
 using MS.Internal.Xaml.Context;
 
 namespace MS.Internal.Xaml
 {
-internal class ServiceProviderContext : ITypeDescriptorContext,  // derives from IServiceProvider
+    internal class ServiceProviderContext : ITypeDescriptorContext,  // derives from IServiceProvider
                                   IServiceProvider,
                                   IXamlTypeResolver,
                                   IUriContext,

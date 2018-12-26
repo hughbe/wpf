@@ -7,47 +7,46 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security;
-using System.Windows.Markup;
 using System.Xaml;
-using System.Xaml.Permissions;
 using System.Xaml.Schema;
+using System.Xaml.Permissions;
+using System.Windows.Markup;
 
 namespace MS.Internal.Xaml.Runtime
 {
-    // Perf notes
-    // - Need a perf test to decide whether it's faster to check for public visibility, or just always 
-    //   fall through to the elevated case once we've determined we don't have MemberAccess permission.
-    // - Consider checking ctor visibility in CreateInstance
-    // - Consider checking method visibility in CreateWithFactoryMethod
-
-    // This class wraps two runtimes: a transparent runtime (typically ClrObjectRuntime)
-    // and an elevated runtime (typically DynamicMethodRuntime). The goal is to use the transparent
-    // runtime when possible--i.e. if we're in Full Trust, or if all the types are public.
-    //
-    // We start out by forwarding all calls to the transparent runtime.
-    // If a call fails with a MethodAccessException, we fall back to the elevated runtime.
-    // After the first failure, we automatically go to the elevated runtime for non-public types.
-    class PartialTrustTolerantRuntime : XamlRuntime
+    /// <summary>
+    /// Perf notes
+    /// - Need a perf test to decide whether it's faster to check for public visibility, or just always 
+    ///   fall through to the elevated case once we've determined we don't have MemberAccess permission.
+    /// - Consider checking ctor visibility in CreateInstance
+    /// - Consider checking method visibility in CreateWithFactoryMethod
+    ///
+    /// This class wraps two runtimes: a transparent runtime (typically ClrObjectRuntime)
+    /// and an elevated runtime (typically DynamicMethodRuntime). The goal is to use the transparent
+    /// runtime when possible--i.e. if we're in Full Trust, or if all the types are public.
+    ///
+    /// We start out by forwarding all calls to the transparent runtime.
+    /// If a call fails with a MethodAccessException, we fall back to the elevated runtime.
+    /// After the first failure, we automatically go to the elevated runtime for non-public types.
+    /// </summary>
+    internal class PartialTrustTolerantRuntime : XamlRuntime
     {
-        bool _memberAccessPermissionDenied;
-        ClrObjectRuntime _transparentRuntime;
-        ClrObjectRuntime _elevatedRuntime;
-        XamlAccessLevel _accessLevel;
-        XamlSchemaContext _schemaContext;
+        private bool _memberAccessPermissionDenied;
+        private ClrObjectRuntime _transparentRuntime;
+        private ClrObjectRuntime _elevatedRuntime;
+        private XamlAccessLevel _accessLevel;
+        private XamlSchemaContext _schemaContext;
 
         public PartialTrustTolerantRuntime(XamlRuntimeSettings runtimeSettings, XamlAccessLevel accessLevel, XamlSchemaContext schemaContext)
         {
-            _transparentRuntime = new ClrObjectRuntime(runtimeSettings, true /*isWriter*/);
+            _transparentRuntime = new ClrObjectRuntime(runtimeSettings, isWriter: true);
             _accessLevel = accessLevel;
             _schemaContext = schemaContext;
         }
 
         public override IAddLineInfo LineInfo
         {
-            get
-            {
-                return _transparentRuntime.LineInfo;
-            }
+            get => _transparentRuntime.LineInfo;
             set
             {
                 _transparentRuntime.LineInfo = value;

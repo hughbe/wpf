@@ -62,9 +62,6 @@ namespace System.Xaml
             }
         }
 
-        #region IDisposable
-
-        // See Framework Design Guidelines, pp. 254-256.
 
         protected bool IsDisposed { get; private set; }
 
@@ -76,14 +73,9 @@ namespace System.Xaml
 
         protected virtual void Dispose(bool disposing)
         {
-            IsDisposed = true; // must call the base class to get IsDisposed == true;
+            IsDisposed = true;
         }
 
-        public void Close()
-        {
-            ((IDisposable)this).Dispose();
-        }
-
-        #endregion
+        public void Close() => ((IDisposable)this).Dispose();
     }
 }

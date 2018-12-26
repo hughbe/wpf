@@ -9,7 +9,7 @@ namespace System.Xaml
     // of nodes with a "Next" delegate.
     // So is suitable for Queues and other simple single reader situations.
     /// </summary>
-    internal class ReaderDelegate : ReaderBaseDelegate
+    internal sealed class ReaderDelegate : ReaderBaseDelegate
     {
         // InfosetNode _currentNode is inherited.
         private XamlNodeNextDelegate _nextDelegate;

@@ -399,7 +399,7 @@ namespace System.Xaml
             XamlMember result;
             if (!_reflector.Members.TryGetValue(name, out result) && !_reflector.Members.IsComplete)
             {
-                result = LookupMember(name, false /*skipReadOnlyCheck*/);
+                result = LookupMember(name, skipReadOnlyCheck: false);
                 result = _reflector.Members.TryAdd(name, result);
             }
             return result;
@@ -653,6 +653,7 @@ namespace System.Xaml
             {
                 return true;
             }
+
             Type underlyingType = UnderlyingType;
             return accessingAssembly != null && underlyingType != null &&
                 TypeReflector.IsVisibleTo(underlyingType, accessingAssembly, SchemaContext);

@@ -28,6 +28,7 @@ namespace System.Xaml
             {
                 throw new ArgumentNullException(nameof(schemaContext));
             }
+
             _nodeQueue = new Queue<XamlNode>();
             _endOfStreamNode = new XamlNode(XamlNode.InternalNodeType.EndOfStream);
             _writer = new WriterDelegate(Add, AddLineInfo, schemaContext);

@@ -11,11 +11,11 @@ using System.Xaml;
 using System.Xaml.Schema;
 using System.Xml;
 using System.Xml.Serialization;
-using XAML3 = System.Windows.Markup;
+using System.Windows.Markup;
 
 namespace MS.Internal.Xaml.Runtime
 {
-    class ClrObjectRuntime : XamlRuntime
+    internal class ClrObjectRuntime : XamlRuntime
     {
         private bool _ignoreCanConvert;
         private bool _isWriter;
@@ -28,6 +28,7 @@ namespace MS.Internal.Xaml.Runtime
             {
                 _ignoreCanConvert = settings.IgnoreCanConvert;
             }
+
             _isWriter = isWriter;
         }
 
@@ -54,12 +55,8 @@ namespace MS.Internal.Xaml.Runtime
             {
                 throw CreateException(SR.Get(SRID.NoConstructor, xamlType.UnderlyingType), ex);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.ConstructorInvocation, xamlType.UnderlyingType), UnwrapTargetInvocationException(ex));
             }
         }
@@ -82,12 +79,8 @@ namespace MS.Internal.Xaml.Runtime
             {
                 instance = InvokeFactoryMethod(type, methodName, args);
             }
-            catch (Exception e)
+            catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if (CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.MethodInvocation, qMethodName), UnwrapTargetInvocationException(e));
             }
             if (instance == null)
@@ -147,18 +140,14 @@ namespace MS.Internal.Xaml.Runtime
             return CreateObjectWithTypeConverter(serviceContext, ts, value);
         }
 
-        public override bool CanConvertToString(XAML3.IValueSerializerContext context, XAML3.ValueSerializer serializer, object instance)
+        public override bool CanConvertToString(IValueSerializerContext context, ValueSerializer serializer, object instance)
         {
             try
             {
                 return serializer.CanConvertToString(instance, context);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.TypeConverterFailed2, instance, typeof(string)), ex);
             }
         }
@@ -169,12 +158,8 @@ namespace MS.Internal.Xaml.Runtime
             {
                 return converter.CanConvertFrom(context, typeof(T));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.CanConvertFromFailed, typeof(T), converter.GetType()), ex);
             }
         }
@@ -185,28 +170,20 @@ namespace MS.Internal.Xaml.Runtime
             {
                 return converter.CanConvertTo(context, type);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.CanConvertToFailed, type, converter.GetType()), ex);
             }
         }
 
-        public override string ConvertToString(XAML3.IValueSerializerContext context, XAML3.ValueSerializer serializer, object instance)
+        public override string ConvertToString(IValueSerializerContext context, ValueSerializer serializer, object instance)
         {
             try
             {
                 return serializer.ConvertToString(instance, context);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.TypeConverterFailed2, instance, typeof(string)), ex);
             }
         }
@@ -217,50 +194,40 @@ namespace MS.Internal.Xaml.Runtime
             {
                 return (T)converter.ConvertTo(context, TypeConverterHelper.InvariantEnglishUS, instance, typeof(T));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.TypeConverterFailed2, instance, typeof(T)), ex);
             }
         }
 
         public override object GetValue(object obj, XamlMember property, bool failIfWriteOnly)
         {
-            object value;
             try
             {
                 if(property.IsDirective)
                 {
-                    value = this.CreateInstance(property.Type, null);
+                    return this.CreateInstance(property.Type, null);
                 }
-                else if(!failIfWriteOnly)
+                else if (!failIfWriteOnly)
                 {
                     try
                     {
-                        value = GetValue(property, obj);
+                        return GetValue(property, obj);
                     }
                     catch(NotSupportedException)
                     {
-                        value = null;
+                        return null;
                     }
                 }
                 else
                 {
-                    value = GetValue(property, obj);
+                    return GetValue(property, obj);
                 }
             }
-            catch(Exception e)
+            catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if(CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.GetValue, property), UnwrapTargetInvocationException(e));
             }
-            return value;
         }
 
         protected virtual object GetValue(XamlMember member, object obj)
@@ -272,18 +239,14 @@ namespace MS.Internal.Xaml.Runtime
         {
             try
             {
-                if(property.IsDirective)
+                if (property.IsDirective)
                 {
                     return;
                 }
                 SetValue(property, inst, value);
             }
-            catch(Exception e)
+            catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if(CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.SetValue, property), UnwrapTargetInvocationException(e));
             }
         }
@@ -299,12 +262,8 @@ namespace MS.Internal.Xaml.Runtime
             {
                 collectionType.Invoker.AddToCollection(collection, value);
             }
-            catch(Exception e)
+            catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if(CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.AddCollection, collectionType), UnwrapTargetInvocationException(e));
             }
         }
@@ -315,37 +274,28 @@ namespace MS.Internal.Xaml.Runtime
             {
                 dictionaryType.Invoker.AddToDictionary(collection, key, value);
             }
-            catch(Exception e)
+            catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if(CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.AddDictionary, dictionaryType), UnwrapTargetInvocationException(e));
             }
         }
 
         public override IList<object> GetCollectionItems(object collection, XamlType collectionType)
         {
-            List<object> result; 
             IEnumerator enumerator = GetItems(collection, collectionType);
             try
             {
-                result = new List<object>();
+                var result = new List<object>();
                 while (enumerator.MoveNext())
                 {
                     result.Add(enumerator.Current);
                 }
+                return result;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.GetItemsException, collectionType), ex);
             }
-            return result;
         }
 
         public override IEnumerable<DictionaryEntry> GetDictionaryItems(object dictionary, XamlType dictionaryType)
@@ -382,12 +332,8 @@ namespace MS.Internal.Xaml.Runtime
                     return DictionaryEntriesFromIEnumerator(enumerator);
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.GetItemsException, dictionaryType), ex);
             }
         }
@@ -398,12 +344,8 @@ namespace MS.Internal.Xaml.Runtime
             {
                 return AttachablePropertyServices.GetAttachedPropertyCount(instance);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.APSException, instance));
             }
         }
@@ -421,12 +363,8 @@ namespace MS.Internal.Xaml.Runtime
                 }
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.APSException, instance));
             }
         }
@@ -435,18 +373,13 @@ namespace MS.Internal.Xaml.Runtime
         {
             try
             {
-                XAML3.IComponentConnector connector = root as XAML3.IComponentConnector;
-                if(connector != null)
+                if (root is IComponentConnector connector)
                 {
                     connector.Connect(connectionId, instance);
                 }
             }
-            catch(Exception e)
+            catch(Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if(CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.SetConnectionId), e);
             }
         }
@@ -455,8 +388,7 @@ namespace MS.Internal.Xaml.Runtime
         {
             try
             {
-                ISupportInitialize supportInit = obj as ISupportInitialize;
-                if(supportInit != null)
+                if (obj is ISupportInitialize supportInit)
                 {
                     if(begin)
                     {
@@ -468,29 +400,20 @@ namespace MS.Internal.Xaml.Runtime
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if(CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.InitializationGuard, xamlType), e);
             }
         }
 
-        public override object CallProvideValue(XAML3.MarkupExtension me, IServiceProvider serviceProvider)
+        public override object CallProvideValue(MarkupExtension me, IServiceProvider serviceProvider)
         {
             try
             {
-                object val = me.ProvideValue(serviceProvider);
-                return val;
+                return me.ProvideValue(serviceProvider);
             }
-            catch(Exception e)
+            catch (Exception e) when (!CriticalExceptions.IsCriticalException(e))
             {
-                if(CriticalExceptions.IsCriticalException(e))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.ProvideValue, me.GetType()), e);
             }
         }
@@ -499,7 +422,7 @@ namespace MS.Internal.Xaml.Runtime
         {
             try
             {
-                XAML3.IUriContext uriContext = obj as XAML3.IUriContext;
+                IUriContext uriContext = obj as IUriContext;
                 if(uriContext != null)
                 {
                     uriContext.BaseUri = baseUri;
@@ -517,7 +440,7 @@ namespace MS.Internal.Xaml.Runtime
 
         // SetXmlInstance: receives the value as "object" so the calling code doesn't
         // need to load System.Xml.dll types to make the call.
-        public override void SetXmlInstance(object inst, XamlMember property, XAML3.XData xData)
+        public override void SetXmlInstance(object inst, XamlMember property, XData xData)
         {
             object propInstance = GetValue(inst, property, true);
             IXmlSerializable iXmlSerial = propInstance as IXmlSerializable;
@@ -608,12 +531,8 @@ namespace MS.Internal.Xaml.Runtime
             {
                 return member.Invoker.ShouldSerializeValue(instance);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.ShouldSerializeFailed, member));
             }
         }
@@ -622,35 +541,28 @@ namespace MS.Internal.Xaml.Runtime
                                      XamlValueConverter<TypeConverter> ts, object value)
         {
             TypeConverter typeConverter = GetConverterInstance(ts);
-
-            object obj;
             if (typeConverter != null)
             {
                 //We sometimes ignoreCanConvert for WPFv3 Compatibility (but only if a string is coming in)
                 if (_ignoreCanConvert && value.GetType() == typeof(string))
                 {
-                    obj = typeConverter.ConvertFrom(serviceContext, TypeConverterHelper.InvariantEnglishUS, value);
+                    return typeConverter.ConvertFrom(serviceContext, TypeConverterHelper.InvariantEnglishUS, value);
+                }
+                else if (typeConverter.CanConvertFrom(value.GetType()))
+                {
+                    return typeConverter.ConvertFrom(serviceContext, TypeConverterHelper.InvariantEnglishUS, value);
                 }
                 else
                 {
-                    if (typeConverter.CanConvertFrom(value.GetType()))
-                    {
-                        obj = typeConverter.ConvertFrom(serviceContext, TypeConverterHelper.InvariantEnglishUS, value);
-                    }
-                    else
-                    {
-                        //let the value passthrough (to be set as the property value later).
-                        obj = value;
-                    }
+                    //let the value passthrough (to be set as the property value later).
+                    return value;
                 }
             }
             else
             {
                 //let the value passthrough (to be set as the property value later).
-                obj = value;
+                return value;
             }
-            
-            return obj;
         }
 
         protected virtual Delegate CreateDelegate(Type delegateType, object target, string methodName)
@@ -689,12 +601,8 @@ namespace MS.Internal.Xaml.Runtime
             {
                 result = collectionType.Invoker.GetItems(collection);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!CriticalExceptions.IsCriticalException(ex))
             {
-                if (CriticalExceptions.IsCriticalException(ex))
-                {
-                    throw;
-                }
                 throw CreateException(SR.Get(SRID.GetItemsException, collectionType), UnwrapTargetInvocationException(ex));
             }
             if (result == null)

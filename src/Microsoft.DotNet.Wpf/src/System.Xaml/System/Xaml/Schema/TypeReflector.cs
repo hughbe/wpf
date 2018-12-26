@@ -9,7 +9,8 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Xaml.MS.Impl;
-using XAML3 = System.Windows.Markup;
+using System.Windows.Markup;
+using System.Linq;
 
 namespace System.Xaml.Schema
 {
@@ -24,7 +25,7 @@ namespace System.Xaml.Schema
             = BindingFlags.Static | BindingFlags.FlattenHierarchy
             | BindingFlags.Public | BindingFlags.NonPublic;
 
-        private static TypeReflector s_UnknownReflector;
+        private static TypeReflector s_unknownReflector;
 
         // Thread safety: MemberDictionary implements its own thread-safety.
         // Lazy init: These fields are null when uninitialized, and must only be initialized once.
@@ -38,9 +39,6 @@ namespace System.Xaml.Schema
         // Lazy init: These fields are null when uninitialized, and must only be initialized once.
         private ThreadSafeDictionary<int, IList<XamlType>> _positionalParameterTypes;
         private ConcurrentDictionary<XamlDirective, XamlMember> _aliasedProperties;
-
-        // Lazy init: set to XamlCollectionKindInvalid when uninitialized
-        private XamlCollectionKind _collectionKind;
 
         // Thread safety:
         // All fields below should either be either uninitialized or complete;
@@ -56,11 +54,11 @@ namespace System.Xaml.Schema
 
         private NullableReference<MethodInfo> _isReadOnlyMethod;
         private NullableReference<XamlValueConverter<TypeConverter>> _typeConverter;
-        private NullableReference<XamlValueConverter<XAML3.ValueSerializer>> _valueSerializer;
+        private NullableReference<XamlValueConverter<ValueSerializer>> _valueSerializer;
         private NullableReference<XamlValueConverter<XamlDeferringLoader>> _deferringLoader;
 
-        private NullableReference<EventHandler<XAML3.XamlSetMarkupExtensionEventArgs>> _xamlSetMarkupExtensionHandler;
-        private NullableReference<EventHandler<XAML3.XamlSetTypeConverterEventArgs>> _xamlSetTypeConverterHandler;
+        private NullableReference<EventHandler<XamlSetMarkupExtensionEventArgs>> _xamlSetMarkupExtensionHandler;
+        private NullableReference<EventHandler<XamlSetTypeConverterEventArgs>> _xamlSetTypeConverterHandler;
 
         private NullableReference<MethodInfo> _addMethod;
         private NullableReference<XamlType> _baseType;
@@ -76,7 +74,7 @@ namespace System.Xaml.Schema
             
             _baseType.Value = XamlLanguage.Object;
             _boolTypeBits = (int)BoolTypeBits.Default | (int)BoolTypeBits.Unknown | (int)BoolTypeBits.WhitespaceSignificantCollection | (int)BoolTypeBits.AllValid;
-            _collectionKind = XamlCollectionKind.None;
+            CollectionKind = XamlCollectionKind.None;
 
             // Set all the nullable references explicitly so that IsSet will be equal to true
             _addMethod.Value = null;
@@ -100,19 +98,12 @@ namespace System.Xaml.Schema
         public TypeReflector(Type underlyingType)
         {
             UnderlyingType = underlyingType;
-            _collectionKind = XamlCollectionKindInvalid;
+            CollectionKind = XamlCollectionKindInvalid;
         }
 
         internal static TypeReflector UnknownReflector
         {
-            get
-            {
-                if (s_UnknownReflector == null)
-                {
-                    s_UnknownReflector = new TypeReflector();
-                }
-                return s_UnknownReflector;
-            }
+            get => s_unknownReflector ?? (s_unknownReflector = new TypeReflector());
         }
 
         #region Static visbility helpers
@@ -177,40 +168,33 @@ namespace System.Xaml.Schema
 
         internal XamlType BaseType
         {
-            get { return _baseType.Value; }
-            set { _baseType.Value = value; }
+            get => _baseType.Value;
+            set => _baseType.Value = value;
         }
 
-        internal bool BaseTypeIsSet
-        {
-            get { return _baseType.IsSet; }
-        }
+        internal bool BaseTypeIsSet => _baseType.IsSet;
 
-        internal XamlCollectionKind CollectionKind
-        {
-            get { return _collectionKind; }
-            set { _collectionKind = value; }
-        }
+        internal XamlCollectionKind CollectionKind { get; set; }
 
-        internal bool CollectionKindIsSet { get { return _collectionKind != XamlCollectionKindInvalid; } }
+        internal bool CollectionKindIsSet => CollectionKind != XamlCollectionKindInvalid;
 
         internal XamlMember ContentProperty
         {
-            get { return _contentProperty.Value; }
-            set { _contentProperty.Value = value; }
+            get => _contentProperty.Value;
+            set => _contentProperty.Value = value;
         }
 
-        internal bool ContentPropertyIsSet { get { return _contentProperty.IsSet; } }
+        internal bool ContentPropertyIsSet => _contentProperty.IsSet;
 
         internal IList<XamlType> ContentWrappers { get; set; }
 
         internal XamlValueConverter<XamlDeferringLoader> DeferringLoader
         {
-            get { return _deferringLoader.Value; }
-            set { _deferringLoader.Value = value; }
+            get => _deferringLoader.Value;
+            set => _deferringLoader.Value = value;
         }
 
-        internal bool DeferringLoaderIsSet { get { return _deferringLoader.IsSet; } }
+        internal bool DeferringLoaderIsSet => _deferringLoader.IsSet;
 
         internal ICollection<XamlMember> ExcludedReadOnlyMembers { get; set; }
 
@@ -220,14 +204,14 @@ namespace System.Xaml.Schema
 
         internal MethodInfo IsReadOnlyMethod
         {
-            get { return _isReadOnlyMethod.Value; }
-            set { _isReadOnlyMethod.Value = value; }
+            get => _isReadOnlyMethod.Value;
+            set => _isReadOnlyMethod.Value = value;
         }
 
-        internal bool IsReadOnlyMethodIsSet { get { return _isReadOnlyMethod.IsSet; } }
+        internal bool IsReadOnlyMethodIsSet => _isReadOnlyMethod.IsSet;
 
         // No need to check valid flag, this is set in constructor
-        internal bool IsUnknown { get { return (_boolTypeBits & (int)BoolTypeBits.Unknown) != 0; } }
+        internal bool IsUnknown => (_boolTypeBits & (int)BoolTypeBits.Unknown) != 0;
 
         internal XamlType ItemType { get; set; }
 
@@ -250,37 +234,37 @@ namespace System.Xaml.Schema
 
         internal XamlValueConverter<TypeConverter> TypeConverter
         {
-            get { return _typeConverter.Value; }
-            set { _typeConverter.Value = value; }
+            get => _typeConverter.Value;
+            set => _typeConverter.Value = value;
         }
 
-        internal bool TypeConverterIsSet { get { return _typeConverter.IsSet; } }
+        internal bool TypeConverterIsSet => _typeConverter.IsSet;
 
         internal Type UnderlyingType { get; set; }
 
-        internal XamlValueConverter<XAML3.ValueSerializer> ValueSerializer
+        internal XamlValueConverter<ValueSerializer> ValueSerializer
         {
-            get { return _valueSerializer.Value; }
-            set { _valueSerializer.Value = value; }
+            get => _valueSerializer.Value;
+            set => _valueSerializer.Value = value;
         }
 
-        internal bool ValueSerializerIsSet { get { return _valueSerializer.IsSet; } }
+        internal bool ValueSerializerIsSet => _valueSerializer.IsSet;
 
-        internal EventHandler<XAML3.XamlSetMarkupExtensionEventArgs> XamlSetMarkupExtensionHandler
+        internal EventHandler<XamlSetMarkupExtensionEventArgs> XamlSetMarkupExtensionHandler
         {
-            get { return _xamlSetMarkupExtensionHandler.Value; }
-            set { _xamlSetMarkupExtensionHandler.Value = value; }
+            get => _xamlSetMarkupExtensionHandler.Value;
+            set => _xamlSetMarkupExtensionHandler.Value = value;
         }
 
-        internal bool XamlSetMarkupExtensionHandlerIsSet { get { return _xamlSetMarkupExtensionHandler.IsSet; } }
+        internal bool XamlSetMarkupExtensionHandlerIsSet => _xamlSetMarkupExtensionHandler.IsSet;
 
-        internal EventHandler<XAML3.XamlSetTypeConverterEventArgs> XamlSetTypeConverterHandler
+        internal EventHandler<XamlSetTypeConverterEventArgs> XamlSetTypeConverterHandler
         {
-            get { return _xamlSetTypeConverterHandler.Value; }
-            set { _xamlSetTypeConverterHandler.Value = value; }
+            get => _xamlSetTypeConverterHandler.Value;
+            set => _xamlSetTypeConverterHandler.Value = value;
         }
 
-        internal bool XamlSetTypeConverterHandlerIsSet { get { return _xamlSetTypeConverterHandler.IsSet; } }
+        internal bool XamlSetTypeConverterHandlerIsSet => _xamlSetTypeConverterHandler.IsSet;
 
         internal bool TryGetPositionalParameters(int paramCount, out IList<XamlType> result)
         {
@@ -371,19 +355,19 @@ namespace System.Xaml.Schema
 
         internal MethodInfo AddMethod
         {
-            get { return _addMethod.Value; }
-            set { _addMethod.Value = value; }
+            get => _addMethod.Value;
+            set => _addMethod.Value = value;
         }
 
-        internal bool AddMethodIsSet { get { return _addMethod.IsSet; } }
+        internal bool AddMethodIsSet => _addMethod.IsSet;
 
         internal MethodInfo GetEnumeratorMethod
         {
-            get { return _getEnumeratorMethod.Value; }
-            set { _getEnumeratorMethod.Value = value; }
+            get => _getEnumeratorMethod.Value;
+            set => _getEnumeratorMethod.Value = value;
         }
 
-        internal bool GetEnumeratorMethodIsSet { get { return _getEnumeratorMethod.IsSet; } }
+        internal bool GetEnumeratorMethodIsSet => _getEnumeratorMethod.IsSet;
 
         #endregion
 
@@ -397,8 +381,8 @@ namespace System.Xaml.Schema
             }
             // We only check this once, at the root of the doc, and only in ObjectWriter.
             // So it's fine to use live reflection here.
-            object obj = GetCustomAttribute(typeof(XAML3.NameScopePropertyAttribute), xamlType.UnderlyingType);
-            XAML3.NameScopePropertyAttribute nspAttr = obj as XAML3.NameScopePropertyAttribute;
+            object obj = GetCustomAttribute(typeof(NameScopePropertyAttribute), xamlType.UnderlyingType);
+            NameScopePropertyAttribute nspAttr = obj as NameScopePropertyAttribute;
             if (nspAttr != null)
             {
                 Type ownerType = nspAttr.Type;
@@ -452,17 +436,19 @@ namespace System.Xaml.Schema
             PropertyInfo[] propList = UnderlyingType.GetProperties(AllProperties_BF);
             EventInfo[] eventList = UnderlyingType.GetEvents(AllProperties_BF);
             knownMembers = new List<XamlMember>(propList.Length + eventList.Length);
-            newProperties = FilterProperties(propList, knownMembers, true);
+            newProperties = FilterProperties(propList, knownMembers, skipKnownNegatives: true);
             newEvents = FilterEvents(eventList, knownMembers);
         }
 
-        // Returns properties that don't yet have corresponding XamlMembers
+        /// <summary>
+        /// Returns properties that don't yet have corresponding XamlMembers.
+        /// </summary>
         internal IList<PropertyInfo> LookupRemainingProperties()
         {
             Debug.Assert(UnderlyingType != null, "Caller should check for UnderlyingType == null");
             Debug.Assert(_nonAttachableMemberCache != null, "Members property should have been invoked before this");
             PropertyInfo[] propList = UnderlyingType.GetProperties(AllProperties_BF);
-            return FilterProperties(propList, null, false);
+            return FilterProperties(propList, null, skipKnownNegatives: false);
         }
 
         private IList<PropertyInfo> FilterProperties(PropertyInfo[] propList, List<XamlMember> knownMembers, bool skipKnownNegatives)
@@ -708,20 +694,12 @@ namespace System.Xaml.Schema
         private void LookupAllStaticAccessors(out Dictionary<string, List<MethodInfo>> getters, 
             out Dictionary<string, List<MethodInfo>> setters, out Dictionary<string, List<MethodInfo>> adders)
         {
-            getters = new Dictionary<string,List<MethodInfo>>();
-            setters = new Dictionary<string,List<MethodInfo>>();
-            adders = new Dictionary<string,List<MethodInfo>>();
+            getters = new Dictionary<string, List<MethodInfo>>();
+            setters = new Dictionary<string, List<MethodInfo>>();
+            adders = new Dictionary<string, List<MethodInfo>>();
 
             MethodInfo[] allMethods = UnderlyingType.GetMethods(AttachableProperties_BF);
-
-            if (UnderlyingType.IsVisible)
-            {
-                LookupAllStaticAccessorsHelper(allMethods, getters, setters, adders, true);
-            }
-            else
-            {
-                LookupAllStaticAccessorsHelper(allMethods, getters, setters, adders, false);
-            }
+            LookupAllStaticAccessorsHelper(allMethods, getters, setters, adders, UnderlyingType.IsVisible);
         }
 
         private void LookupAllStaticAccessorsHelper(MethodInfo[] allMethods, Dictionary<string,List<MethodInfo>> getters,
@@ -894,7 +872,7 @@ namespace System.Xaml.Schema
         {
             // Static Getter has one argument and does not return void
             ParameterInfo[] pmi = mi.GetParameters();
-            return (pmi.Length == 1) && (mi.ReturnType != typeof(void));
+            return pmi.Length == 1 && mi.ReturnType != typeof(void);
         }
 
         private bool IsAttachablePropertySetter(MethodInfo mi, out string name)
@@ -916,7 +894,7 @@ namespace System.Xaml.Schema
         {
             // Static Setter has two arguments 
             ParameterInfo[] pmi = mi.GetParameters();
-            return (pmi.Length == 2);
+            return pmi.Length == 2;
         }
 
         private bool IsAttachableEventAdder(MethodInfo mi, out string name)
@@ -939,7 +917,7 @@ namespace System.Xaml.Schema
         {
             // Static Adder has two arguments, and second is a delegate
             ParameterInfo[] pmi = mi.GetParameters();
-            return (pmi.Length == 2) && typeof(Delegate).IsAssignableFrom(pmi[1].ParameterType);
+            return pmi.Length == 2 && typeof(Delegate).IsAssignableFrom(pmi[1].ParameterType);
         }
 
         // Unlike other TypeReflector methods, this one interacts direclty with SchemaContext.
@@ -1038,10 +1016,7 @@ namespace System.Xaml.Schema
         #endregion
 
         // Used by Reflector for attribute lookups
-        protected override MemberInfo Member
-        {
-            get { return UnderlyingType; }
-        }
+        protected override MemberInfo Member => UnderlyingType;
 
         private static object GetCustomAttribute(Type attrType, Type reflectedType)
         {
@@ -1052,9 +1027,7 @@ namespace System.Xaml.Schema
             }
             if (objs.Length > 1)
             {
-                string message = SR.Get(SRID.TooManyAttributesOnType,
-                                                    reflectedType.Name, attrType.Name);
-                throw new XamlSchemaException(message);
+                throw new XamlSchemaException(SR.Get(SRID.TooManyAttributesOnType, reflectedType.Name, attrType.Name));
             }
             return objs[0];
         }
@@ -1089,7 +1062,7 @@ namespace System.Xaml.Schema
 
         internal class ThreadSafeDictionary<K,V> : Dictionary<K, V> where V : class
         {
-            bool _isComplete;
+            private bool _isComplete;
 
             internal ThreadSafeDictionary()
             {
@@ -1097,7 +1070,7 @@ namespace System.Xaml.Schema
 
             public bool IsComplete
             {
-                get { return _isComplete; }
+                get => _isComplete;
                 set
                 {
                     Debug.Assert(value);
