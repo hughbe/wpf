@@ -34,23 +34,22 @@ namespace System.Windows.Markup.Tests
 
         [Theory]
         [MemberData(nameof(Equals_TestData))]
-        public void Equals_Invoke_ReturnsExpected(ContentWrapperAttribute attribute, object other, bool expected)
+        public void Equals_Invoke_ReturnsExpected(ContentWrapperAttribute attribute, object obj, bool expected)
         {
-            Assert.Equal(expected, attribute.Equals(other));
+            Assert.Equal(expected, attribute.Equals(obj));
         }
 
-        [Fact]
-        public void GetHashCode_Invoke_ReturnsExpected()
+        public static IEnumerable<object[]> GetHashCode_TestData()
         {
-            var attribute = new ContentWrapperAttribute(typeof(int));
-            Assert.Equal(typeof(int).GetHashCode(), attribute.GetHashCode());   
+            yield return new object[] { new ContentWrapperAttribute(typeof(int)), typeof(int).GetHashCode() };
+            yield return new object[] { new ContentWrapperAttribute(null), 0 };
         }
 
-        [Fact]
-        public void GetHashCode_NullContentWrapper_ThrowsNullReferenceException()
+        [Theory]
+        [MemberData(nameof(GetHashCode_TestData))]
+        public void GetHashCode_Invoke_ReturnsExpected(ContentWrapperAttribute attribute, int expected)
         {
-            var attribute = new ContentWrapperAttribute(null);
-            Assert.Throws<NullReferenceException>(() => attribute.GetHashCode());
+            Assert.Equal(expected, attribute.GetHashCode());
         }
 
         [Fact]
