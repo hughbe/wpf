@@ -95,8 +95,7 @@ namespace System.Xaml.Schema
                 return null;
             }
 
-            xamlType = XamlSchemaContext.TryAdd(_typeCache, typeName, xamlType);
-            return xamlType;
+            return XamlSchemaContext.TryAdd(_typeCache, typeName, xamlType);
         }
 
         private XamlType TryGetXamlType(string typeName, Type[] typeArgs)
@@ -107,7 +106,7 @@ namespace System.Xaml.Schema
             // MakeGenericType on it so we need to process array subscripts.
             string subscript;
             typeName = GenericTypeNameScanner.StripSubscript(typeName, out subscript);
-            typeName = typeName + KnownStrings.GraveQuote + typeArgs.Length;
+            typeName = MangleGenericTypeName(typeName, typeArgs.Length);
 
             // Get the open generic type.
             XamlType openXamlType = TryGetXamlType(typeName);
@@ -149,6 +148,11 @@ namespace System.Xaml.Schema
             }
             while (pos < subscript.Length);
             return type;
+        }
+
+        private static string MangleGenericTypeName(string typeName, int paramNum)
+        {
+            return typeName + KnownStrings.GraveQuote + paramNum;
         }
 
         private Type[] ConvertArrayOfXamlTypesToTypes(XamlType[] typeArgs)
